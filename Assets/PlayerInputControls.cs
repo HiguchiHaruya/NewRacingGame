@@ -15,10 +15,10 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
-public partial class @OriginalInputControlsClass: IInputActionCollection2, IDisposable
+public partial class PlayerInputControls : IInputActionCollection2, IDisposable
 {
     public InputActionAsset asset { get; }
-    public @OriginalInputControlsClass()
+    public PlayerInputControls()
     {
         asset = InputActionAsset.FromJson(@"{
     ""name"": ""PlayerInputControls"",
@@ -275,8 +275,8 @@ public partial class @OriginalInputControlsClass: IInputActionCollection2, IDisp
     private readonly InputAction m_PlayerActionMap_other;
     public struct PlayerActionMapActions
     {
-        private @OriginalInputControlsClass m_Wrapper;
-        public PlayerActionMapActions(@OriginalInputControlsClass wrapper) { m_Wrapper = wrapper; }
+        private PlayerInputControls m_Wrapper;
+        public PlayerActionMapActions(PlayerInputControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Drift => m_Wrapper.m_PlayerActionMap_Drift;
         public InputAction @MoveForward => m_Wrapper.m_PlayerActionMap_MoveForward;
         public InputAction @MoveBack => m_Wrapper.m_PlayerActionMap_MoveBack;
