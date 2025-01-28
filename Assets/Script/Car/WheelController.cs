@@ -9,6 +9,8 @@ using UnityEngine.ProBuilder.Shapes;
 public class WheelController : Vehicle, ICar
 {
     [SerializeField]
+    private float _turnSpeed = 65f;
+    [SerializeField]
     private float _driftAngle = 10f;
     [SerializeField]
     private float _tiltSpeed = 5f;
@@ -18,6 +20,8 @@ public class WheelController : Vehicle, ICar
     Transform _carbody;
     private int _firstRun = 0;
     private float _forwardInput;
+    private float _sideInput;
+    public float Speed { get; private set; }
     protected override void Awake()
     {
         base.Awake();
@@ -27,14 +31,25 @@ public class WheelController : Vehicle, ICar
         _carbody = this.transform;
         _rb = GetComponent<Rigidbody>();
         RegisterTire();
+
         InputReader.Instance.OnMoveForwardAsObservable.Subscribe(context =>
         {
-           // Debug.Log($"+++ ‘O“ü—Í—ˆ‚Ü‚µ‚½");
             _forwardInput = context.ReadValue<float>();
         }).AddTo(this);
+
         InputReader.Instance.OnMoveBackAsObservable.Subscribe(context =>
         {
             _forwardInput -= context.ReadValue<float>();
+        }).AddTo(this);
+
+        InputReader.Instance.OnMoveRightAsObservable.Subscribe(context =>
+        {
+            _sideInput = context.ReadValue<float>();
+        }).AddTo(this);
+
+        InputReader.Instance.OnMoveLeftAsObservable.Subscribe(context =>
+        {
+            _sideInput = -1 * context.ReadValue<float>();
         }).AddTo(this);
     }
 
@@ -48,17 +63,25 @@ public class WheelController : Vehicle, ICar
 
     void FixedUpdate()
     {
-       // if (!GameManager.Instance.IsGameStart) return;
+        Debug.Log($"‰¡input{_sideInput}");
+        // if (!GameManager.Instance.IsGameStart) return;
         Drift();
-        MoveSideways();
+        MoveSideways(_sideInput);
         Precession(_forwardInput);
         Breake();
         Acceleration(_rb);
+        Speed = _rb.velocity.magnitude;
         //ApplyCarTilt(_carbody,_driftAngle,_tiltSpeed);
     }
-    public override void MoveSideways()
+    public override void MoveSideways(float input)
     {
-        base.MoveSideways();
+        base.MoveSideways(_sideInput);
+         _turnSpeed = 65f; 
+
+        Quaternion currentRotation = _rb.rotation;
+        Quaternion deltaRotation = Quaternion.Euler(0, input * _turnSpeed * Time.fixedDeltaTime, 0);
+        Quaternion newRotation = currentRotation * deltaRotation;
+        _rb.MoveRotation(newRotation);
     }
     public override void ApplyCarTilt(Transform carBody, float tiltAngle, float tiltSpeed)
     {

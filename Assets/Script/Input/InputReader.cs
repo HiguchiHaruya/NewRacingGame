@@ -7,6 +7,7 @@ using System;
 using Unity.VisualScripting;
 public class InputReader : Singleton<InputReader>, PlayerInputControls.IPlayerActionMapActions
 {
+ 
     private PlayerInputControls _contrls;
     private float _forwardInput;
     private float _backwardInput;

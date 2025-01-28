@@ -37,11 +37,15 @@ public class Vehicle : Singleton<Vehicle>, ICar
     {
         if (input > 0)
         {
-            _torque = -1 * _maxTorque;
+            _torque = _maxTorque;
         }
         else if (input < 0)
         {
-            _torque = _maxTorque;
+            _torque = -1 * _maxTorque;
+        }
+        else if (input == 0)
+        {
+            _torque = 0;
         }
         rearLeft.motorTorque = _torque;
         rearRight.motorTorque = _torque;
@@ -49,22 +53,22 @@ public class Vehicle : Singleton<Vehicle>, ICar
         frontRight.motorTorque = _torque;
     }
     /// <summary>â°à⁄ìÆÉÅÉ\ÉbÉh </summary>
-    public virtual void MoveSideways()
+    public virtual void MoveSideways(float input)
     {
-        var leftInput = InputManager.Instance._inputActions.PlayerActionMap.MoveLeft.ReadValue<float>();
-        var rightInput = InputManager.Instance._inputActions.PlayerActionMap.MoveRight.ReadValue<float>();
-        if (leftInput > 0)
-        {
-            steer = angle * -leftInput;
-        }
-        else if (rightInput > 0)
-        {
-            steer = angle * rightInput;
-        }
-        else
-        {
-            steer = 0;
-        }
+        //var leftInput = InputManager.Instance._inputActions.PlayerActionMap.MoveLeft.ReadValue<float>();
+        //var rightInput = InputManager.Instance._inputActions.PlayerActionMap.MoveRight.ReadValue<float>();
+        //if (input > 0)
+        //{
+        //    steer = angle * input;
+        //}
+        //else if (rightInput < 0)
+        //{
+        //    steer = angle * rightInput;
+        //}
+        //else
+        //{
+        //    steer = 0;
+        //}
         frontLeft.steerAngle = steer;
         frontRight.steerAngle = steer;
     }

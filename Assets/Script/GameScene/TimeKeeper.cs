@@ -11,7 +11,6 @@ public class TimeKeeper : Singleton<TimeKeeper>
     public IReadOnlyReactiveProperty<int> Seconds => _secondsReactive;
     private ReactiveProperty<int> _minutesReactive = new ReactiveProperty<int>(0);
     private ReactiveProperty<int> _secondsReactive = new ReactiveProperty<int>(0);
-
     private void Start()
     {
         Observable.Interval(System.TimeSpan.FromSeconds(1f))
