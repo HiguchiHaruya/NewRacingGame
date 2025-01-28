@@ -11,8 +11,13 @@ public class AICarController : MonoBehaviour
 
     private void Start()
     {
-        _agent = GetComponent<NavMeshAgent>();
         SetNextDestination();
+        NavMeshSetUp();
+    }
+
+    private void NavMeshSetUp()
+    {
+        _agent = GetComponent<NavMeshAgent>();
         _agent.updateRotation = false;
     }
 
@@ -20,13 +25,14 @@ public class AICarController : MonoBehaviour
     {
         // WayPoint‚É“ž’B‚µ‚½‚çŽŸ‚Ì–Ú“I’n‚Ö
         Circulate();
-        Vector3 targetDir = (wayPoints[_currentIndex].position - transform.position).normalized;
-        SetRotate(targetDir);
+        Vector3 targetDir = (_agent.steeringTarget - transform.position).normalized;
+        Quaternion targetRotation = Quaternion.LookRotation(targetDir);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5);
     }
 
     private void Circulate()
     {
-        if (!_agent.pathPending && _agent.remainingDistance < 5.0f)
+        if (!_agent.pathPending && _agent.remainingDistance < 15f)
         {
             _currentIndex = (_currentIndex + 1) % wayPoints.Length;
             SetNextDestination();
@@ -39,13 +45,5 @@ public class AICarController : MonoBehaviour
         Vector3 randomOffset = new Vector3(Random.Range(-6f, 6f), 0, Random.Range(-6f, 6f));
         Vector3 targetPosition = wayPoints[_currentIndex].position + randomOffset;
         _agent.SetDestination(targetPosition);
-    }
-    private void SetRotate(Vector3 dir)
-    {
-        Quaternion targetRotation = Quaternion.LookRotation(dir);
-        if (_rb.TryGetComponent<Rigidbody>(out var rb))
-        {
-            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 50 * Time.fixedDeltaTime));
-        }
     }
 }
