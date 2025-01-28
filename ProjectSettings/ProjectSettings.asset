@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 26
-  productGUID: 8aecf8841bbd5364babc16bb31eedebe
+  productGUID: 7cfc8d49f8edf0e44a55bbb473b54fa8
   AndroidProfiler: 1
   AndroidFilterTouchesWhenObscured: 0
   AndroidEnableSustainedPerformanceMode: 0
@@ -162,7 +162,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
     Android: com.PerfectGames.ArcadeCarControllerDrift
-    Standalone: com.DefaultCompany.Racing-Game
+    Standalone: com.PerfectGames.ACC_Lite
   buildNumber:
     Standalone: 0
     VisionOS: 0
@@ -249,7 +249,7 @@ PlayerSettings:
   iOSAutomaticallyDetectAndAddCapabilities: 1
   appleEnableProMotion: 0
   shaderPrecisionModel: 0
-  clonedFromGUID: 2a16cb9536174f64d85f2f7eae22363c
+  clonedFromGUID: d9f0fbcf28d02bf49bdfcd9a116e7669
   templatePackageId: 
   templateDefaultScene: 
   useCustomMainManifest: 0
@@ -768,14 +768,14 @@ PlayerSettings:
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: Racing Game
+  metroPackageName: NewRacingGame
   metroPackageVersion: 
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: 0000000000000000
-  metroApplicationDescription: Racing Game
+  metroApplicationDescription: NewRacingGame
   wsaImages: {}
   metroTileShortName: 
   metroTileShowName: 0

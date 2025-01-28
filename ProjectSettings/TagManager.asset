@@ -10,7 +10,7 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - MiniMap
+  - 
   - Water
   - UI
   - 
@@ -21,7 +21,7 @@ TagManager:
   - Metal
   - Rubber
   - FinishZone
-  - Effect
+  - 
   - 
   - 
   - 
