@@ -10,14 +10,13 @@ public class AICarController : MonoBehaviour
     [SerializeField] private GameObject _player;
     [SerializeField] private float _baseSpeed = 25;
     private List<Transform> _wayPointList;
-    private WayPointManager _wayPointManager;
     private int _currentIndex = 0;
     private Rigidbody _rb;
 
     private void Start()
     {
-        _wayPointManager = FindObjectOfType<WayPointManager>();
-        _wayPointList = _wayPointManager.GetWayPoint();
+        //_wayPointManager = FindObjectOfType<WayPointManager>();
+        //_wayPointList = _wayPointManager.GetWayPoint();
         NavMeshSetUp();
         SetNextDestination();
     }

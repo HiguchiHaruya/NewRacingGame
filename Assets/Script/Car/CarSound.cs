@@ -19,24 +19,24 @@ public class CarSound : MonoBehaviour
     void Update()
     {
      //   Debug.Log(Vehicle.Instance.IsDrifting);
-        SelectSound();
+        //SelectSound();
     }
 
-    private void SelectSound()
-    {
-        switch (Vehicle.Instance.GetCurrentState())
-        {
-            case CarState.Idle:
-                PlayEngineSound(0);
-                break;
-            case CarState.Low:
-                PlayEngineSound(1);
-                break;
-            case CarState.High:
-                PlayEngineSound(2);
-                break;
-        }
-    }
+    //private void SelectSound()
+    //{
+    //    switch (Vehicle.Instance.GetCurrentState())
+    //    {
+    //        case CarState.Idle:
+    //            PlayEngineSound(0);
+    //            break;
+    //        case CarState.Low:
+    //            PlayEngineSound(1);
+    //            break;
+    //        case CarState.High:
+    //            PlayEngineSound(2);
+    //            break;
+    //    }
+    //}
 
     private void PlayEngineSound(int index)
     {

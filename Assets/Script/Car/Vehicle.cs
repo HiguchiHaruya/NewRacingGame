@@ -5,8 +5,9 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System;
+using Photon.Pun;
 
-public class Vehicle : Singleton<Vehicle>, ICar
+public class Vehicle : MonoBehaviourPunCallbacks, ICar
 {
     [SerializeField]
     private float _maxTorque; //Max速度
@@ -17,6 +18,18 @@ public class Vehicle : Singleton<Vehicle>, ICar
     protected WheelCollider frontRight, frontLeft, rearRight, rearLeft; //タイヤ達
     private CarState _currentState;
     public float Torque => _torque;
+    public static Vehicle Instance;
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else if (Instance != null)
+        {
+            Destroy(this);
+        }
+    }
     private void Start()
     {
         _currentState = CarState.Idle;

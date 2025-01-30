@@ -22,12 +22,13 @@ public class WheelController : Vehicle, ICar
     private float _forwardInput;
     private float _sideInput;
     public float Speed { get; private set; }
-    protected override void Awake()
-    {
-        base.Awake();
-    }
     private void Start()
     {
+        if (!photonView.IsMine)
+        {
+            GetComponent<PlayerInput>().enabled = false;
+            return;
+        }
         _carbody = this.transform;
         _rb = GetComponent<Rigidbody>();
         RegisterTire();
@@ -63,20 +64,18 @@ public class WheelController : Vehicle, ICar
 
     void FixedUpdate()
     {
-        Debug.Log($"‰¡input{_sideInput}");
-        // if (!GameManager.Instance.IsGameStart) return;
+        if (!photonView.IsMine) { return; }
         Drift();
         MoveSideways(_sideInput);
         Precession(_forwardInput);
         Breake();
         Acceleration(_rb);
         Speed = _rb.velocity.magnitude;
-        //ApplyCarTilt(_carbody,_driftAngle,_tiltSpeed);
     }
     public override void MoveSideways(float input)
     {
         base.MoveSideways(_sideInput);
-         _turnSpeed = 65f; 
+        _turnSpeed = 65f;
 
         Quaternion currentRotation = _rb.rotation;
         Quaternion deltaRotation = Quaternion.Euler(0, input * _turnSpeed * Time.fixedDeltaTime, 0);

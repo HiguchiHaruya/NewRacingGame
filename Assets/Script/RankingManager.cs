@@ -37,7 +37,7 @@ public class RankingManager : Singleton<RankingManager>
     /// <summary>ランキングデータ消去メソッド</summary>
     private void ClearRankingData()
     {
-        Debug.Log("ランキングデータ消去!!!!!");
+       // Debug.Log("ランキングデータ消去!!!!!");
         rankingList.Clear();
         List<PlayerScore> empty = new List<PlayerScore>();
         string json = JsonConvert.SerializeObject(empty, Formatting.Indented); //Formatting.Indented → jsonファイルに改行とか入れて読みやすくしてくれる
@@ -49,7 +49,7 @@ public class RankingManager : Singleton<RankingManager>
     {
         string jsonData = JsonConvert.SerializeObject(rankingList, Formatting.Indented); //リストをjson形式に変換する
         File.WriteAllText(filePath, jsonData); //ファイルにjsonデータを書き込む
-        Debug.Log("rankingが保存されました！");
+      //  Debug.Log("rankingが保存されました！");
     }
     /// <summary> ランキングデータ読み込む</summary>
     public void LoadRanking()
@@ -57,7 +57,7 @@ public class RankingManager : Singleton<RankingManager>
         if (!File.Exists(filePath)) return; //ファイルが存在しない場合はreturn
         string jsonData = File.ReadAllText(filePath); //読み込む
         rankingList = JsonConvert.DeserializeObject<List<PlayerScore>>(jsonData); //Jsonデータをリストに変換してrankingListに入れる
-        Debug.Log("rankingがロードされました！");
+       // Debug.Log("rankingがロードされました！");
     }
     /// <summary>ランキングデータを渡す</summary>
     /// <param name="rank"></param>
