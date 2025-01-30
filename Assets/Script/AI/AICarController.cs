@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
@@ -8,11 +9,15 @@ public class AICarController : MonoBehaviour
     [SerializeField] private Transform[] wayPoints;
     [SerializeField] private GameObject _player;
     [SerializeField] private float _baseSpeed = 25;
+    private List<Transform> _wayPointList;
+    private WayPointManager _wayPointManager;
     private int _currentIndex = 0;
     private Rigidbody _rb;
 
     private void Start()
     {
+        _wayPointManager = FindObjectOfType<WayPointManager>();
+        _wayPointList = _wayPointManager.GetWayPoint();
         NavMeshSetUp();
         SetNextDestination();
     }
@@ -36,7 +41,13 @@ public class AICarController : MonoBehaviour
     }
     private void Circulate()
     {
-        if (wayPoints.Length < 0) return;
+        //if (wayPoints.Length < 0) return;
+        //if (!_agent.pathPending && _agent.remainingDistance < 15f)
+        //{
+        //    _currentIndex = (_currentIndex + 1) % wayPoints.Length;
+        //    SetNextDestination();
+        //}
+        if (wayPoints.Length<= 0) return;
         if (!_agent.pathPending && _agent.remainingDistance < 15f)
         {
             _currentIndex = (_currentIndex + 1) % wayPoints.Length;

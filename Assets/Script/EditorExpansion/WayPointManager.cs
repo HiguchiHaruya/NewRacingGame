@@ -35,6 +35,11 @@ public class WayPointManager : MonoBehaviour
             _wayPoints.Add(newPoint.transform);
         }
     }
+    public List<Transform> GetWayPoint()
+    {
+        GenerateWayPoints();
+        return _wayPoints;
+    }
     private Vector3 AdjustHeight(Vector3 position)
     {
         RaycastHit hit;
