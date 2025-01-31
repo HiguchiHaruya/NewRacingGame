@@ -29,7 +29,7 @@ public class ResultSceneManager : MonoBehaviour
     {
       //  Destroy(Vehicle.Instance.gameObject);
         Destroy(GameManager.Instance.gameObject);
-        SceneTransitionManager.Instance.LoadSceneAsync(scenename);
+     //   SceneTransitionManager.Instance.LoadSceneAsync(scenename);
     }
     private void AddRanking()
     {

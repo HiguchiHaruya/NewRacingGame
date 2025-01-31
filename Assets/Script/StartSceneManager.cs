@@ -17,12 +17,12 @@ public class StartSceneManager : MonoBehaviour
     private InputField _playerName;
     private void Start()
     {
-        _transitionToConfigButton
-            .onClick
-            .AddListener(() => SceneTransitionManager.Instance.LoadSceneAsync(_transitionToConfigText));
+        //_transitionToConfigButton
+        //    .onClick
+        //    .AddListener(() => SceneTransitionManager.Instance.LoadSceneAsync(_transitionToConfigText));
 
-        _transitionToGameButton
-            .onClick
-            .AddListener(() => SceneTransitionManager.Instance.LoadSceneAsync(_transitionToGameText));
+        //_transitionToGameButton
+        //    .onClick
+        //    .AddListener(() => SceneTransitionManager.Instance.LoadSceneAsync(_transitionToGameText));
     }
 }

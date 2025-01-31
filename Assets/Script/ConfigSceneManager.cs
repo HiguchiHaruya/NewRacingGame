@@ -9,6 +9,6 @@ public class ConfigSceneManager : MonoBehaviour
     Button _transitionToStart;
     private void Start()
     {
-        _transitionToStart.onClick.AddListener(() => SceneTransitionManager.Instance.LoadSceneAsync("StartScene"));
+      //  _transitionToStart.onClick.AddListener(() => SceneTransitionManager.Instance.LoadSceneAsync("StartScene"));
     }
 }

@@ -5,27 +5,29 @@ using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
 using System.Linq;
+using UnityEngine.UI;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] TMP_Text _statusText;
+    [SerializeField] TMP_Text _readyText;
     [SerializeField] int _maxPlayer = 4;
+    [SerializeField] Button _readyButton;
     private string _status;
+    List<int> _readyPlayers = new List<int>();
     private void Start()
     {
+        _readyButton.interactable = false;
         PhotonNetwork.ConnectUsingSettings(); //サーバーに接続
+        _readyText.text = "準備中";
+        _readyButton.onClick.AddListener(SetReady);
     }
     private void FixedUpdate()
     {
         _statusText.text = _status;
-        if (PhotonNetwork.IsMasterClient)
+        if (Input.GetKeyDown(KeyCode.Return))
         {
-
-        }
-        if (Input.GetKeyDown(KeyCode.Return)) //デバッグ
-        {
-            _status = "ゲームを開始します";
-            PhotonNetwork.LoadLevel("GameScene");
+            GameStart();
         }
     }
     public override void OnConnectedToMaster() //サーバーに接続成功した時のコールバック()
@@ -41,17 +43,27 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         _status = "ルームに接続完了。最大人数に達したらゲームを開始します。。";
-        CheckPlayerCount(); //最大人数に達したらゲーム開始
+        _readyPlayers.Add(PhotonNetwork.LocalPlayer.ActorNumber);
+        _readyButton.interactable = true;
     }
     private void GameStart()
     {
         //ゲームを開始処理
-
+        Debug.Log("移行します");
+        StartCoroutine(SceneTransitionManager.Instance.LoadSceneAll("GameScene"));
     }
-    private void CheckPlayerCount()
+    public void SetReady()
     {
-        if (PhotonNetwork.PlayerList.Length == _maxPlayer)
+        _readyButton.interactable = false;
+        _readyText.text = "準備完了";
+        photonView.RPC("CheckAllReady", RpcTarget.All);
+    }
+    [PunRPC]
+    void CheckAllReady()
+    {
+        if (_readyPlayers.Count == PhotonNetwork.PlayerList.Length)
         {
+            GameStart();
         }
     }
 }
