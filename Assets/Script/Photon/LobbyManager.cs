@@ -6,6 +6,7 @@ using Photon.Realtime;
 using TMPro;
 using System.Linq;
 using UnityEngine.UI;
+using ExitGames.Client.Photon;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
@@ -15,10 +16,17 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     [SerializeField] Button _readyButton;
     private string _status;
     List<int> _readyPlayers = new List<int>();
+    public static LobbyManager Instance;
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else if (Instance != null) Destroy(gameObject);
+    }
     private void Start()
     {
         _readyButton.interactable = false;
         PhotonNetwork.ConnectUsingSettings(); //サーバーに接続
+        PhotonNetwork.AutomaticallySyncScene = true;
         _readyText.text = "準備中";
         _readyButton.onClick.AddListener(SetReady);
     }
@@ -43,7 +51,6 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedRoom()
     {
         _status = "ルームに接続完了。最大人数に達したらゲームを開始します。。";
-        _readyPlayers.Add(PhotonNetwork.LocalPlayer.ActorNumber);
         _readyButton.interactable = true;
     }
     private void GameStart()
@@ -56,11 +63,24 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         _readyButton.interactable = false;
         _readyText.text = "準備完了";
-        photonView.RPC("CheckAllReady", RpcTarget.All);
+        //photonView.RPC("CheckAllReady", RpcTarget.All);
+        ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable { { "IsReady", true } };
+        PhotonNetwork.LocalPlayer.SetCustomProperties(props);
+        //CheckAllReady();
+    }
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
+    {
+        if (!PhotonNetwork.IsMasterClient) return;
+        if (changedProps.ContainsKey("IsReady") == true)
+        {
+            _readyPlayers.Add(PhotonNetwork.LocalPlayer.ActorNumber);
+            photonView.RPC("CheckAllReady", RpcTarget.All);
+        }
     }
     [PunRPC]
     void CheckAllReady()
     {
+        if (!PhotonNetwork.IsMasterClient) return;
         if (_readyPlayers.Count == PhotonNetwork.PlayerList.Length)
         {
             GameStart();

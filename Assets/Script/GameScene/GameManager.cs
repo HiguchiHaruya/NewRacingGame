@@ -8,11 +8,15 @@ using UnityEngine;
 
 public class GameManager : Singleton<GameManager>
 {
+    [SerializeField] Transform[] _playerSpawnPoint;
     public string playerName { private get; set; }
     private void Start()
     {
-        PhotonNetwork.Instantiate("Car", new Vector3(-397.200012f, 0.109999999f, -6.67999983f), Quaternion.Euler(0, 90, 0));
-
+        if(!PhotonNetwork.IsMasterClient)return;
+        for(int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
+        {
+            PhotonNetwork.Instantiate("Car", _playerSpawnPoint[i].transform.position, Quaternion.Euler(0, 90, 0));
+        }
     }
     private void Goal()
     {

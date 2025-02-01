@@ -31,10 +31,10 @@ public class LobbyPlayerList : MonoBehaviourPunCallbacks
         {
             if (string.IsNullOrEmpty(player.NickName))
             {
-                _playerListText.text += $"Player {player.ActorNumber} : –¼–³‚µ‚³‚ñ";
+                _playerListText.text += $"Player {player.ActorNumber} : –¼–³‚µ‚³‚ñ\n";
                 return;
             }
-            _playerListText.text += $"Player {player.ActorNumber} : {player.NickName}";
+            _playerListText.text += $"Player {player.ActorNumber} : {player.NickName}\n";
         }
     }
 }
