@@ -10412,7 +10412,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3910788601794578934
 Transform:
   m_ObjectHideFlags: 0
@@ -10465,7 +10465,7 @@ Camera:
   field of view: 60.000004
   orthographic: 0
   orthographic size: 10
-  m_Depth: -1
+  m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 32055
@@ -10573,7 +10573,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3448443288765243103
 Transform:
   m_ObjectHideFlags: 0
@@ -11325,6 +11325,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.85, y: 0.93, z: 4.34}
   m_Center: {x: 0, y: 0.85, z: -0.018977284}
+--- !u!1 &6400297300239535475
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8549981039978504959}
+  m_Layer: 0
+  m_Name: CameraPos
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8549981039978504959
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6400297300239535475}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.17478983, y: 0.00000014901158, z: -0.000000029802315, w: 0.9846058}
+  m_LocalPosition: {x: 0, y: 1.7999998, z: -4.910004}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4301849270217873766}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6856966066459350893
 GameObject:
   m_ObjectHideFlags: 0
@@ -11367,6 +11398,7 @@ Transform:
   - {fileID: 4572497490188722416}
   - {fileID: 5284127287215908516}
   - {fileID: 9087267096294807522}
+  - {fileID: 8549981039978504959}
   - {fileID: 3910788601794578934}
   - {fileID: 106120395166295582}
   m_Father: {fileID: 0}
@@ -11473,7 +11505,7 @@ MonoBehaviour:
   _frontLeft: {fileID: 4311511229358965603}
   _rearRight: {fileID: 1486204757531229571}
   _rearLeft: {fileID: 179797203504311939}
-  _playerCamera: {fileID: 4528945686846416873}
+  _cameraPosition: {fileID: 8549981039978504959}
 --- !u!114 &6173368506334079404
 MonoBehaviour:
   m_ObjectHideFlags: 0

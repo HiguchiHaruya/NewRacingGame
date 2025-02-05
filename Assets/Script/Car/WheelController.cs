@@ -14,9 +14,8 @@ public class WheelController : Vehicle, ICar
     private float _tiltSpeed = 5f;
     [SerializeField]
     private WheelCollider _frontRight, _frontLeft, _rearRight, _rearLeft;
-
     [SerializeField]
-    private Camera _playerCamera;
+    private Transform _cameraPosition;
     private Rigidbody _rb;
     private Transform _carbody;
     private float _forwardInput;
@@ -29,16 +28,11 @@ public class WheelController : Vehicle, ICar
     private void Start()
     {
         _photonView = GetComponent<PhotonView>();
-
         if (!_photonView.IsMine)
         {
             GetComponent<PlayerInput>().enabled = false;
-            _playerCamera.enabled = false;
-            _playerCamera.gameObject.SetActive(false);
             return;
         }
-        _playerCamera.enabled = true;
-        _playerCamera.gameObject.SetActive(true);
         _carbody = transform;
         _rb = GetComponent<Rigidbody>();
         RegisterTire();
@@ -84,6 +78,10 @@ public class WheelController : Vehicle, ICar
         Breake();
         Acceleration(_rb);
         Speed = _rb.velocity.magnitude;
+    }
+    public Transform GetCameraPosition()
+    {
+        return _cameraPosition;
     }
 
     public override void MoveSideways(float input)

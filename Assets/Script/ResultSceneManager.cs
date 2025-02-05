@@ -28,7 +28,7 @@ public class ResultSceneManager : MonoBehaviour
     private void SceneTransition(string scenename)
     {
       //  Destroy(Vehicle.Instance.gameObject);
-        Destroy(GameManager.Instance.gameObject);
+      //  Destroy(GameManager.Instance.gameObject);
      //   SceneTransitionManager.Instance.LoadSceneAsync(scenename);
     }
     private void AddRanking()
