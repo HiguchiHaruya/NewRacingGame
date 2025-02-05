@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,16 +10,16 @@ public class InputManager : MonoBehaviour
     public static InputManager Instance;
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            _inputActions = new PlayerInputControls();
-            DontDestroyOnLoad(gameObject);
-        }
-        else if (Instance != null)
-        {
-            Destroy(gameObject);
-        }
+        //if (Instance == null)
+        //{
+        //    Instance = this;
+        _inputActions = new PlayerInputControls();
+        //    DontDestroyOnLoad(gameObject);
+        //}
+        //else if (Instance != null)
+        //{
+        //    Destroy(gameObject);
+        //}
     }
     private void OnEnable()
     {

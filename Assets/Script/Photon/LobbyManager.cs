@@ -12,6 +12,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] TMP_Text _statusText;
     [SerializeField] TMP_Text _readyText;
+    [SerializeField] TMP_Text _TestText;
     [SerializeField] int _maxPlayer = 4;
     [SerializeField] Button _readyButton;
     private string _status;
@@ -21,21 +22,22 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         if (Instance == null) Instance = this;
         else if (Instance != null) Destroy(gameObject);
+
+        PhotonNetwork.ConnectUsingSettings(); //サーバーに接続
     }
     private void Start()
     {
-        _readyButton.interactable = false;
-        PhotonNetwork.ConnectUsingSettings(); //サーバーに接続
         PhotonNetwork.AutomaticallySyncScene = true;
+        _readyButton.interactable = false;
         _readyText.text = "準備中";
         _readyButton.onClick.AddListener(SetReady);
     }
     private void FixedUpdate()
     {
         _statusText.text = _status;
-        if (Input.GetKeyDown(KeyCode.Return))
+        if (PhotonNetwork.CurrentRoom != null)
         {
-            GameStart();
+            _TestText.text = $"Room名 : {PhotonNetwork.CurrentRoom.Name}  {PhotonNetwork.CurrentRoom.PlayerCount}人";
         }
     }
     public override void OnConnectedToMaster() //サーバーに接続成功した時のコールバック()
@@ -46,7 +48,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         _status = "ロビーに接続完了。ルームに接続します";
-        PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions { MaxPlayers = (byte)_maxPlayer }, TypedLobby.Default);
+        PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions { MaxPlayers = (byte)_maxPlayer, IsVisible = true }, TypedLobby.Default);
     }
     public override void OnJoinedRoom()
     {
@@ -83,7 +85,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient) return;
         if (_readyPlayers.Count == PhotonNetwork.PlayerList.Length)
         {
-            GameStart();
+            Debug.Log("全員準備完了！マスタークライアントがシーンを変更します");
+            PhotonNetwork.LoadLevel("GameScene");
         }
     }
 }

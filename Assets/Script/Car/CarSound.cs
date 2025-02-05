@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CarSound : MonoBehaviour
 {
-    private CarState _idle = CarState.Idle;
+  //  private CarState _idle = CarState.Idle;
     [SerializeField]
     private AudioSource _carAudio;
     [SerializeField]

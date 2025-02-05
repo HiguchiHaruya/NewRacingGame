@@ -13,6 +13,7 @@ public class PlayerInfoManager : MonoBehaviourPunCallbacks
     {
         if (PhotonNetwork.IsConnected)
         {
+            PhotonNetwork.NickName = "–¼–³‚µ‚³‚ñ";
             AssignPlayerNumber();
         }
     }

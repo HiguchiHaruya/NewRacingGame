@@ -1,10 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
 using UniRx;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.ProBuilder.Shapes;
+using Photon.Pun;
 
 public class WheelController : Vehicle, ICar
 {
@@ -15,40 +13,54 @@ public class WheelController : Vehicle, ICar
     [SerializeField]
     private float _tiltSpeed = 5f;
     [SerializeField]
-    WheelCollider _frontRight, _frontLeft, _rearRight, _rearLeft;
-    Rigidbody _rb;
-    Transform _carbody;
-    private int _firstRun = 0;
+    private WheelCollider _frontRight, _frontLeft, _rearRight, _rearLeft;
+
+    [SerializeField]
+    private Camera _playerCamera;
+    private Rigidbody _rb;
+    private Transform _carbody;
     private float _forwardInput;
     private float _sideInput;
+    private InputReader _inputReader;
+    private PhotonView _photonView;
+
     public float Speed { get; private set; }
+
     private void Start()
     {
-        if (!photonView.IsMine)
+        _photonView = GetComponent<PhotonView>();
+
+        if (!_photonView.IsMine)
         {
             GetComponent<PlayerInput>().enabled = false;
+            _playerCamera.enabled = false;
+            _playerCamera.gameObject.SetActive(false);
             return;
         }
-        _carbody = this.transform;
+        _playerCamera.enabled = true;
+        _playerCamera.gameObject.SetActive(true);
+        _carbody = transform;
         _rb = GetComponent<Rigidbody>();
         RegisterTire();
 
-        InputReader.Instance.OnMoveForwardAsObservable.Subscribe(context =>
+        _inputReader = GetComponent<InputReader>();
+
+        _inputReader.OnMoveForwardAsObservable.Subscribe(context =>
         {
             _forwardInput = context.ReadValue<float>();
         }).AddTo(this);
 
-        InputReader.Instance.OnMoveBackAsObservable.Subscribe(context =>
+        _inputReader.OnMoveBackAsObservable.Subscribe(context =>
         {
             _forwardInput -= context.ReadValue<float>();
         }).AddTo(this);
 
-        InputReader.Instance.OnMoveRightAsObservable.Subscribe(context =>
+        _inputReader.OnMoveRightAsObservable.Subscribe(context =>
         {
             _sideInput = context.ReadValue<float>();
         }).AddTo(this);
 
-        InputReader.Instance.OnMoveLeftAsObservable.Subscribe(context =>
+        _inputReader.OnMoveLeftAsObservable.Subscribe(context =>
         {
             _sideInput = -1 * context.ReadValue<float>();
         }).AddTo(this);
@@ -56,15 +68,16 @@ public class WheelController : Vehicle, ICar
 
     private void RegisterTire()
     {
-        base.frontLeft = this._frontLeft;
-        base.frontRight = this._frontRight;
-        base.rearLeft = this._rearLeft;
-        base.rearRight = this._rearRight;
+        base.frontLeft = _frontLeft;
+        base.frontRight = _frontRight;
+        base.rearLeft = _rearLeft;
+        base.rearRight = _rearRight;
     }
 
     void FixedUpdate()
     {
-        if (!photonView.IsMine) { return; }
+        if (!_photonView.IsMine) return;
+
         Drift();
         MoveSideways(_sideInput);
         Precession(_forwardInput);
@@ -72,9 +85,10 @@ public class WheelController : Vehicle, ICar
         Acceleration(_rb);
         Speed = _rb.velocity.magnitude;
     }
+
     public override void MoveSideways(float input)
     {
-        base.MoveSideways(_sideInput);
+        base.MoveSideways(input);
         _turnSpeed = 65f;
 
         Quaternion currentRotation = _rb.rotation;
@@ -82,22 +96,27 @@ public class WheelController : Vehicle, ICar
         Quaternion newRotation = currentRotation * deltaRotation;
         _rb.MoveRotation(newRotation);
     }
+
     public override void ApplyCarTilt(Transform carBody, float tiltAngle, float tiltSpeed)
     {
         base.ApplyCarTilt(carBody, tiltAngle, tiltSpeed);
     }
+
     public override void Precession(float input)
     {
-        base.Precession(_forwardInput);
+        base.Precession(input);
     }
+
     public override void Breake()
     {
         base.Breake();
     }
+
     public override void Drift()
     {
         base.Drift();
     }
+
     public override void Acceleration(Rigidbody rb)
     {
         base.Acceleration(rb);

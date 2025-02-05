@@ -16,9 +16,9 @@ public class ApplyUI : MonoBehaviour
             .Subscribe(time => _timeText.text = time)
             .AddTo(this);
 
-        LapManager.Instance.CurrentLap
-            .Subscribe(lap => _lapText.text = $"{lap.ToString()} / 3")
-            .AddTo(this);
+        //LapManager.Instance.CurrentLap
+        //    .Subscribe(lap => _lapText.text = $"{lap.ToString()} / 3")
+        //    .AddTo(this);
 
         
     }

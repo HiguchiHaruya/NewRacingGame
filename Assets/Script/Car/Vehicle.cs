@@ -16,7 +16,7 @@ public class Vehicle : MonoBehaviourPunCallbacks, ICar
     private float _torque = 0; //現在の速度
     float steer = 0;
     protected WheelCollider frontRight, frontLeft, rearRight, rearLeft; //タイヤ達
-    private CarState _currentState;
+                                                                        // private CarState _currentState;
     public float Torque => _torque;
     public static Vehicle Instance;
     private void Awake()
@@ -32,19 +32,19 @@ public class Vehicle : MonoBehaviourPunCallbacks, ICar
     }
     private void Start()
     {
-        _currentState = CarState.Idle;
+        //  _currentState = CarState.Idle;
     }
-    private void Update()
-    {
-        ChangeState();
-    }
+    //private void Update()
+    //{
+    //    ChangeState();
+    //}
 
-    private void ChangeState()
-    {
-        if (frontLeft.motorTorque <= -2400) { _currentState = CarState.High; }
-        else if (frontLeft.motorTorque >= -2400 && frontLeft.motorTorque < 0) { _currentState = CarState.Low; }
-        else if (frontLeft.motorTorque >= 0) { _currentState = CarState.Idle; }
-    }
+    //private void ChangeState()
+    //{
+    //    if (frontLeft.motorTorque <= -2400) { _currentState = CarState.High; }
+    //    else if (frontLeft.motorTorque >= -2400 && frontLeft.motorTorque < 0) { _currentState = CarState.Low; }
+    //    else if (frontLeft.motorTorque >= 0) { _currentState = CarState.Idle; }
+    //}
     /// <summary>前移動メソッド</summary>
     public virtual void Precession(float input)
     {
@@ -94,12 +94,12 @@ public class Vehicle : MonoBehaviourPunCallbacks, ICar
     }
     public virtual void Breake()
     {
-        var breakeInput = InputManager.Instance._inputActions.PlayerActionMap.Brake.ReadValue<float>();
-        float brakeforce = breakeInput > 0 ? brake : 0;
-        frontLeft.brakeTorque = brakeforce;
-        frontRight.brakeTorque = brakeforce;
-        rearLeft.brakeTorque = brakeforce;
-        rearRight.brakeTorque = brakeforce;
+      ////  var breakeInput = InputManager.Instance._inputActions.PlayerActionMap.Brake.ReadValue<float>();
+      //  float brakeforce = breakeInput > 0 ? brake : 0;
+      //  frontLeft.brakeTorque = brakeforce;
+      //  frontRight.brakeTorque = brakeforce;
+      //  rearLeft.brakeTorque = brakeforce;
+      //  rearRight.brakeTorque = brakeforce;
     }
     public virtual void Drift()
     {
@@ -152,14 +152,15 @@ public class Vehicle : MonoBehaviourPunCallbacks, ICar
         float speed = 2 * Mathf.PI * wheelRadius * avgRpm / 60; //タイヤの回転数から車の速度(m/s)を計算する
         return speed * 3.6f; //m/sをkm/hメートル毎秒をキロメートル毎時に変換
     }
-    public CarState GetCurrentState()
-    {
-        return _currentState;
-    }
 }
-public enum CarState
-{
-    Idle,
-    Low,
-    High
-}
+//    public CarState GetCurrentState()
+//    {
+//      //  return _currentState;
+//    }
+//}
+//public enum CarState
+//{
+//    Idle,
+//    Low,
+//    High
+//}

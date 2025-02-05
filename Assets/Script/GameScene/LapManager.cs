@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 
-public class LapManager : Singleton<LapManager>
+public class LapManager : MonoBehaviour
 {
     ReactiveCollection<int> Triggers = new ReactiveCollection<int>();
     [SerializeField] private int totalTriggers;

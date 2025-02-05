@@ -21,7 +21,7 @@ namespace UniRx.Triggers
         
         Subject<Joint2D> onJointBreak2D;
 
-        void OnJointBreak2D(Joint2D brokenJoint)
+        void OnJointBreak(Joint2D brokenJoint)
         {
             if (onJointBreak2D != null) onJointBreak2D.OnNext(brokenJoint);
         }
