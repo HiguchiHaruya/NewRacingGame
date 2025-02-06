@@ -30,7 +30,7 @@ public class WheelController : Vehicle, ICar
         _photonView = GetComponent<PhotonView>();
         if (!_photonView.IsMine)
         {
-            GetComponent<PlayerInput>().enabled = false;
+           // GetComponent<PlayerInput>().enabled = false;
             return;
         }
         _carbody = transform;

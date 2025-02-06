@@ -3,10 +3,12 @@ using UnityEngine;
 using UniRx;
 using UnityEngine.InputSystem;
 using System;
+using Photon.Pun;
 
 public class InputReader : MonoBehaviour, PlayerInputControls.IPlayerActionMapActions
 {
     private PlayerInputControls _controls;
+    private PhotonView _view;
     private Subject<InputAction.CallbackContext> _onBrakeSubject = new();
     private Subject<InputAction.CallbackContext> _onDriftSubject = new();
     private Subject<InputAction.CallbackContext> _onMoveBackSubject = new();
@@ -27,14 +29,22 @@ public class InputReader : MonoBehaviour, PlayerInputControls.IPlayerActionMapAc
 
     private void Awake()
     {
-        _controls = new PlayerInputControls();
-        _controls.PlayerActionMap.SetCallbacks(this);
-        _controls.PlayerActionMap.Enable();
+        _view = GetComponent<PhotonView>();
+        if (_view.IsMine)
+        {
+            _controls = new PlayerInputControls();
+            _controls.PlayerActionMap.SetCallbacks(this);
+            _controls.PlayerActionMap.Enable();
+            Debug.Log("inputControlのセットアップが完了しました");
+        }
     }
 
     private void OnDestroy()
     {
-        _controls.PlayerActionMap.Disable();
+        if (_view.IsMine)
+        {
+            _controls.PlayerActionMap.Disable();
+        }
     }
 
     public void OnBrake(InputAction.CallbackContext context) => _onBrakeSubject.OnNext(context);

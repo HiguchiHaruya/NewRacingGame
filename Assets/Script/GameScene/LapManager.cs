@@ -22,7 +22,7 @@ public class LapManager : MonoBehaviour
     {
         var trigger = other.GetComponent<TriggerID>();
         Triggers.Add(trigger.ID);
-       // Debug.Log($"^^{trigger.name}Çí âﬂ");
+        // Debug.Log($"^^{trigger.name}Çí âﬂ");
 
     }
     public void LapComplate()
@@ -34,12 +34,19 @@ public class LapManager : MonoBehaviour
         if (_currentLap.Value >= 3)
         {
             _isGoal.Value = true;
-            Debug.Log("^^Ç≤Å[ÇÈ");
         }
         ResetTriggers();
     }
     public void ResetTriggers()
     {
         Triggers.Clear();
+    }
+    private void FixedUpdate()
+    {
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            _currentLap.Value++;
+            Debug.Log(CurrentLap.Value);
+        }
     }
 }

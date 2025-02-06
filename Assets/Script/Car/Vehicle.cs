@@ -21,14 +21,14 @@ public class Vehicle : MonoBehaviourPunCallbacks, ICar
     public static Vehicle Instance;
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else if (Instance != null)
-        {
-            Destroy(this);
-        }
+        //if (Instance == null)
+        //{
+        //    Instance = this;
+        //}
+        //else if (Instance != null)
+        //{
+        //    Destroy(this);
+        //}
     }
     private void Start()
     {

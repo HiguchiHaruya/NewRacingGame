@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UniRx;
@@ -5,6 +6,7 @@ using UnityEngine;
 
 public class TimeKeeper : Singleton<TimeKeeper>
 {
+    [SerializeField] GameObject[] _players;
     private int _minutes = 0;
     private int _seconds = 0;
     public IReadOnlyReactiveProperty<int> Minutes => _minutesReactive;
@@ -16,6 +18,21 @@ public class TimeKeeper : Singleton<TimeKeeper>
         Observable.Interval(System.TimeSpan.FromSeconds(1f))
             .Subscribe(_ => IncrementTime()) //1秒ごとに時間を加算していく
             .AddTo(this);
+
+        for (int i = 0; i <= PhotonNetwork.PlayerList.Length; i++)
+        {
+            if (_players[PhotonNetwork.LocalPlayer.ActorNumber - 1].TryGetComponent<LapManager>(out var lapManager))
+            {
+                lapManager.IsGoal
+                    .Where(isGoal => isGoal)
+                    .Subscribe(_ =>
+                    {
+                        GameManager.Instance.SetMinute(Minutes.Value);
+                        GameManager.Instance.SetSecond(Seconds.Value);
+                    })
+                    .AddTo(this);
+            }
+        }
     }
     private void IncrementTime()
     {
@@ -29,6 +46,6 @@ public class TimeKeeper : Singleton<TimeKeeper>
             _minutes += 1;
             _minutesReactive.Value = _minutes;
         }
-       // Debug.Log($"現在のタイム{_minutes}m {_seconds}s");
+        // Debug.Log($"現在のタイム{_minutes}m {_seconds}s");
     }
 }
