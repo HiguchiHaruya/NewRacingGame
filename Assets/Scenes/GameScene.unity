@@ -211476,7 +211476,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1577337335
 RectTransform:
   m_ObjectHideFlags: 0
@@ -221727,11 +221727,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _timeText: {fileID: 1435535934}
-  _lapText: {fileID: 1577337336}
-  testText: {fileID: 0}
-  _players:
-  - {fileID: 6856966066459350893, guid: cd96b2b346cf35a4abd17859329dff59, type: 3}
-  - {fileID: 6856966066459350893, guid: c9b53af298d7b354189eea9749128353, type: 3}
 --- !u!4 &1666211646
 Transform:
   m_ObjectHideFlags: 0

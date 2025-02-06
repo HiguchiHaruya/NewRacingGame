@@ -1,38 +1,58 @@
 using Cinemachine;
 using Photon.Pun;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
-using Photon.Pun;
+using System.Linq;
+using UniRx;
+using Cysharp.Threading.Tasks;
 using Photon.Realtime;
-using ExitGames.Client.Photon;
 public class GameManager : Singleton<GameManager>
 {
     [SerializeField] Transform[] _playerSpawnPoint;
     [SerializeField] Camera[] _playerCamera;
 
     List<string> names = new List<string>() { "Car", "Car2" };
-    int a = 0;
+    GameObject _player;
+    int _initial = 0;
     private void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
     }
     private void FixedUpdate()
     {
-        if (PhotonNetwork.InRoom && a == 0)
+        GameSetUp();
+    }
+    private async void GameEndAsync()
+    {
+        await SetGoalFlag();
+        PhotonNetwork.Destroy(_player);
+      //  if (!PhotonNetwork.IsMasterClient) return;
+        int goalPlayers = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Goal") && (bool)p.CustomProperties["Goal"]);
+        if (goalPlayers >= PhotonNetwork.PlayerList.Length)
         {
-            a++;
-            var player = PhotonNetwork.Instantiate(names[PhotonNetwork.LocalPlayer.ActorNumber - 1], _playerSpawnPoint[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.position, Quaternion.Euler(0, 90, 0));
-            var controller = player.GetComponent<WheelController>();
-            var virtualCamera = player.GetComponentInChildren<CinemachineVirtualCamera>();
-            _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.parent = player.transform;
+            PhotonNetwork.LoadLevel("ResultScene");
+        }
+    }
+    private void GameSetUp()
+    {
+        if (PhotonNetwork.InRoom && _initial == 0)
+        {
+            _initial++;
+            _player = PhotonNetwork.Instantiate(names[PhotonNetwork.LocalPlayer.ActorNumber - 1], _playerSpawnPoint[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.position, Quaternion.Euler(0, 90, 0));
+            var controller = _player.GetComponent<WheelController>();
+            var virtualCamera = _player.GetComponentInChildren<CinemachineVirtualCamera>();
+            _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.parent = _player.transform;
             _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.position = controller.GetCameraPosition().position;
-            if (player.GetComponent<PhotonView>().IsMine)
+            if (_player.GetComponent<PhotonView>().IsMine)
             {
                 virtualCamera.Priority = 999;
                 _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].depth = 999;
+
+                _player
+                    .GetComponent<LapManager>().IsGoal
+                    .Where(g => g)
+                    .Subscribe(_ => GameEndAsync())
+                    .AddTo(this);
             }
         }
     }
@@ -45,6 +65,13 @@ public class GameManager : Singleton<GameManager>
     {
         ExitGames.Client.Photon.Hashtable prpps = new ExitGames.Client.Photon.Hashtable { { "Second", second } };
         PhotonNetwork.LocalPlayer.SetCustomProperties(prpps);
+    }
+    public async UniTask SetGoalFlag()
+    {
+        ExitGames.Client.Photon.Hashtable prpps = new ExitGames.Client.Photon.Hashtable { { "Goal", true } };
+        PhotonNetwork.LocalPlayer.SetCustomProperties(prpps);
+        await UniTask.WaitUntil(() => PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("Goal")  //à¯êîÇ™trueÇ…Ç»ÇÈÇ‹Ç≈ë“Ç¬
+        && (bool)PhotonNetwork.LocalPlayer.CustomProperties["Goal"]);
     }
 }
 
