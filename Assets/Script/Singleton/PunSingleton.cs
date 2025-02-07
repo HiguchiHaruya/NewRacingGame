@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
+using Photon.Pun;
+public class PunSingleton<T> : MonoBehaviourPunCallbacks where T : MonoBehaviourPunCallbacks
 {
     private static T _instance;
     public static T Instance
@@ -27,7 +27,6 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
         if (_instance == null)
         {
             _instance = this as T;
-            //DontDestroyOnLoad(gameObject); // 必要であればシーン間で保持
         }
         else if (_instance != this)
         {

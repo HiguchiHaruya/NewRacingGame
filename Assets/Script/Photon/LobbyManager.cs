@@ -7,6 +7,7 @@ using TMPro;
 using System.Linq;
 using UnityEngine.UI;
 using ExitGames.Client.Photon;
+using Cysharp.Threading.Tasks;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
@@ -15,7 +16,12 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     [SerializeField] TMP_Text _TestText;
     [SerializeField] int _maxPlayer = 4;
     [SerializeField] Button _readyButton;
+    [SerializeField] InputField _roomNameInputField;
+    [SerializeField] Button _submitButton;
+    [SerializeField] GameObject _panel;
     private string _status;
+    private UniTaskCompletionSource<bool> _joinRoomTask;
+    private UniTaskCompletionSource<string> _inputTask;
     List<int> _readyPlayers = new List<int>();
     public static LobbyManager Instance;
     private void Awake()
@@ -29,6 +35,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         PhotonNetwork.AutomaticallySyncScene = true;
         _readyButton.interactable = false;
+        _panel.SetActive(false);
         _readyText.text = "準備中";
         _readyButton.onClick.AddListener(SetReady);
     }
@@ -45,15 +52,33 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         _status = "サーバーに接続完了。ロビーに接続します";
         PhotonNetwork.JoinLobby();
     }
-    public override void OnJoinedLobby()
+    public override async void OnJoinedLobby()
     {
         _status = "ロビーに接続完了。ルームに接続します";
-        PhotonNetwork.JoinOrCreateRoom("Room", new RoomOptions { MaxPlayers = (byte)_maxPlayer, IsVisible = true }, TypedLobby.Default);
+        _panel.gameObject.SetActive(true);
+        var name = await WaitInputField();
+        PhotonNetwork.JoinOrCreateRoom(name, new RoomOptions { MaxPlayers = (byte)_maxPlayer, IsVisible = true }, TypedLobby.Default);
     }
+    private async UniTask<string> WaitInputField()
+    {
+        _inputTask = new UniTaskCompletionSource<string>();
+        _submitButton.onClick.AddListener(() => _inputTask.TrySetResult(_roomNameInputField.text));
+        string result = await _inputTask.Task;
+        _submitButton.onClick.RemoveAllListeners();
+        return result;
+    }
+    //private async UniTask<bool> SpecifiedRoom(string roomName)
+    //{
+    //    _joinRoomTask = new UniTaskCompletionSource<bool>();
+    //    PhotonNetwork.JoinOrCreateRoom(roomName, new RoomOptions { MaxPlayers = (byte)_maxPlayer, IsVisible = true }, TypedLobby.Default);
+    //    return await _joinRoomTask.Task;
+    //}
+
     public override void OnJoinedRoom()
     {
-        _status = "ルームに接続完了。最大人数に達したらゲームを開始します。。";
+        _status = "ルームに接続完了。全員が準備完了したらゲームを開始します";
         _readyButton.interactable = true;
+        _panel.gameObject.SetActive(false);
     }
     private void GameStart()
     {

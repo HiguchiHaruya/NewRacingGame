@@ -6,7 +6,7 @@ using System.Linq;
 using UniRx;
 using Cysharp.Threading.Tasks;
 using Photon.Realtime;
-public class GameManager : Singleton<GameManager>
+public class GameManager : PunSingleton<GameManager>
 {
     [SerializeField] Transform[] _playerSpawnPoint;
     [SerializeField] Camera[] _playerCamera;
@@ -26,11 +26,11 @@ public class GameManager : Singleton<GameManager>
     {
         await SetGoalFlag();
         PhotonNetwork.Destroy(_player);
-      //  if (!PhotonNetwork.IsMasterClient) return;
+        //  if (!PhotonNetwork.IsMasterClient) return;
         int goalPlayers = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Goal") && (bool)p.CustomProperties["Goal"]);
         if (goalPlayers >= PhotonNetwork.PlayerList.Length)
         {
-            PhotonNetwork.LoadLevel("ResultScene");
+            photonView.RPC("TransitResultScene", RpcTarget.All);
         }
     }
     private void GameSetUp()
@@ -72,6 +72,11 @@ public class GameManager : Singleton<GameManager>
         PhotonNetwork.LocalPlayer.SetCustomProperties(prpps);
         await UniTask.WaitUntil(() => PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("Goal")  //à¯êîÇ™trueÇ…Ç»ÇÈÇ‹Ç≈ë“Ç¬
         && (bool)PhotonNetwork.LocalPlayer.CustomProperties["Goal"]);
+    }
+    [PunRPC]
+    private void TransitResultScene()
+    {
+        PhotonNetwork.LoadLevel("ResultScene");
     }
 }
 
