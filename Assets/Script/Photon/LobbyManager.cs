@@ -29,15 +29,15 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         if (Instance == null) Instance = this;
         else if (Instance != null) Destroy(gameObject);
 
-        PhotonNetwork.ConnectUsingSettings(); //サーバーに接続
+      //  PhotonNetwork.ConnectUsingSettings(); //サーバーに接続
     }
     private void Start()
     {
-        PhotonNetwork.AutomaticallySyncScene = true;
-        _readyButton.interactable = false;
-        _panel.SetActive(false);
-        _readyText.text = "準備中";
-        _readyButton.onClick.AddListener(SetReady);
+        //PhotonNetwork.AutomaticallySyncScene = true;
+        //_readyButton.interactable = false;
+        //_panel.SetActive(false);
+        //_readyText.text = "準備中";
+        //_readyButton.onClick.AddListener(SetReady);
     }
     private void FixedUpdate()
     {
@@ -50,6 +50,11 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster() //サーバーに接続成功した時のコールバック()
     {
         _status = "サーバーに接続完了。ロビーに接続します";
+        PhotonNetwork.AutomaticallySyncScene = true;
+        _readyButton.interactable = false;
+        _panel.SetActive(false);
+        _readyText.text = "準備中";
+        _readyButton.onClick.AddListener(SetReady);
         PhotonNetwork.JoinLobby();
     }
     public override async void OnJoinedLobby()

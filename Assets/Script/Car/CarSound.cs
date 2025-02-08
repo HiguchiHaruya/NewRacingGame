@@ -1,58 +1,28 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CarSound : MonoBehaviour
 {
-  //  private CarState _idle = CarState.Idle;
-    [SerializeField]
-    private AudioSource _carAudio;
-    [SerializeField]
-    private AudioSource _driftSoundAudio;
-    [SerializeField]
-    private AudioClip[] _clip;
-    private float _maxVolume = 1.0f;
-    private float _minVolume = 0.2f;
-    private float _maxPitch = 2.0f;
-    private float _minPitch = 0.5f;
-    private bool _highSpeed = false;
-    void Update()
+    AudioSource _audioSource;
+    PhotonView _view;
+    [HideInInspector] public float _pitch = 1;
+    private void Start()
     {
-     //   Debug.Log(Vehicle.Instance.IsDrifting);
-        //SelectSound();
+        _view = GetComponent<PhotonView>();
+        _audioSource = this.GetComponent<AudioSource>();
     }
-
-    //private void SelectSound()
-    //{
-    //    switch (Vehicle.Instance.GetCurrentState())
-    //    {
-    //        case CarState.Idle:
-    //            PlayEngineSound(0);
-    //            break;
-    //        case CarState.Low:
-    //            PlayEngineSound(1);
-    //            break;
-    //        case CarState.High:
-    //            PlayEngineSound(2);
-    //            break;
-    //    }
-    //}
-
-    private void PlayEngineSound(int index)
+    private void FixedUpdate()
     {
-        if (_carAudio == null) return;
-        _carAudio.Stop();
-        _carAudio.clip = _clip[index];
-        _carAudio.Play();
+        if (!_view.IsMine) return;
+        _audioSource.pitch = _pitch;
     }
-    private void StopEngineSound()
+    public void SoundPlay()
     {
-        if(_carAudio == null) return;
-        _carAudio.Stop();
+        if (!_view.IsMine) return;
+        _audioSource.Play();
+        _audioSource.loop = true;
     }
-    private void PlayDriftSound()
-    {
-        if(_driftSoundAudio == null) return;
-        _driftSoundAudio.Play();
-    }
+    public void SoundStop() => _audioSource.Stop();
 }

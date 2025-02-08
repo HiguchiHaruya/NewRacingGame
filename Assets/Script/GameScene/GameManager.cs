@@ -6,17 +6,24 @@ using System.Linq;
 using UniRx;
 using Cysharp.Threading.Tasks;
 using Photon.Realtime;
+using PlayFab.ClientModels;
+using PlayFab;
 public class GameManager : PunSingleton<GameManager>
 {
     [SerializeField] Transform[] _playerSpawnPoint;
     [SerializeField] Camera[] _playerCamera;
-
+    int _minute;
+    int _second;
     List<string> names = new List<string>() { "Car", "Car2" };
     GameObject _player;
     int _initial = 0;
     private void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
+    }
+    private void OnDestroy()
+    {
+        PhotonNetwork.Disconnect();
     }
     private void FixedUpdate()
     {
@@ -30,6 +37,7 @@ public class GameManager : PunSingleton<GameManager>
         int goalPlayers = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Goal") && (bool)p.CustomProperties["Goal"]);
         if (goalPlayers >= PhotonNetwork.PlayerList.Length)
         {
+            await ResultTimeToPlayFabAsync();
             photonView.RPC("TransitResultScene", RpcTarget.All);
         }
     }
@@ -45,24 +53,53 @@ public class GameManager : PunSingleton<GameManager>
             _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.position = controller.GetCameraPosition().position;
             if (_player.GetComponent<PhotonView>().IsMine)
             {
+                _player
+                             .GetComponent<LapManager>().IsGoal
+                             .Where(g => g)
+                             .Subscribe(_ => GameEndAsync())
+                             .AddTo(this);
                 virtualCamera.Priority = 999;
                 _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].depth = 999;
-
-                _player
-                    .GetComponent<LapManager>().IsGoal
-                    .Where(g => g)
-                    .Subscribe(_ => GameEndAsync())
-                    .AddTo(this);
+                _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].GetComponent<AudioListener>().enabled = true;
+                _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].GetComponent<AudioSource>().enabled = true;
+            }
+            else
+            {
+                _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].GetComponent<AudioListener>().enabled = false;
+                _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].GetComponent<AudioSource>().enabled = false;
             }
         }
     }
+    private async UniTask ResultTimeToPlayFabAsync()
+    {
+        int totalSeconds = ConvertTimeToScore(_minute, _second);
+        var tcs = new UniTaskCompletionSource<bool>();
+        var request = new UpdatePlayerStatisticsRequest
+        {
+            Statistics = new List<StatisticUpdate>
+            {
+                new StatisticUpdate{StatisticName = "RaceTime",Value = totalSeconds}
+            }
+        };
+        PlayFabClientAPI.UpdatePlayerStatistics(request,
+            result => tcs.TrySetResult(true),
+            error => tcs.TrySetException(new System.Exception($"タイム送信失敗{error.ErrorMessage}")));
+        await tcs.Task;
+        Debug.Log("タイム送信完了");
+    }
+    private int ConvertTimeToScore(int m, int s)
+    {
+        return (m * 60) + s;
+    }
     public void SetMinute(int minute)
     {
+        _minute = minute;
         ExitGames.Client.Photon.Hashtable prpps = new ExitGames.Client.Photon.Hashtable { { "Minute", minute } };
         PhotonNetwork.LocalPlayer.SetCustomProperties(prpps);
     }
     public void SetSecond(int second)
     {
+        _second = second;
         ExitGames.Client.Photon.Hashtable prpps = new ExitGames.Client.Photon.Hashtable { { "Second", second } };
         PhotonNetwork.LocalPlayer.SetCustomProperties(prpps);
     }
