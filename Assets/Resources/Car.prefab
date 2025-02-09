@@ -11761,6 +11761,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalTriggers: 12
+  _isGoal:
+    value: 0
 --- !u!114 &3642893094612690972
 MonoBehaviour:
   m_ObjectHideFlags: 0

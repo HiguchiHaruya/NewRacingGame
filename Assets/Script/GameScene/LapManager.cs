@@ -10,7 +10,7 @@ public class LapManager : MonoBehaviour
     ReactiveCollection<int> Triggers = new ReactiveCollection<int>();
     [SerializeField] private int totalTriggers;
     ReactiveProperty<int> _currentLap = new ReactiveProperty<int>(3);
-    ReactiveProperty<bool> _isGoal = new ReactiveProperty<bool>(false);
+    public ReactiveProperty<bool> _isGoal = new ReactiveProperty<bool>(false);
     public IReadOnlyReactiveProperty<int> CurrentLap => _currentLap;
     public IReadOnlyReactiveProperty<bool> IsGoal => _isGoal;
     private void Start()

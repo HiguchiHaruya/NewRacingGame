@@ -19,14 +19,17 @@ public class TimeKeeper : Singleton<TimeKeeper>
             .Subscribe(_ => IncrementTime()) //1•b‚²‚Æ‚ÉŠÔ‚ğ‰ÁZ‚µ‚Ä‚¢‚­
             .AddTo(this);
 
-        for (int i = 0; i <= PhotonNetwork.PlayerList.Length; i++)
+        for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
         {
             if (_players[PhotonNetwork.LocalPlayer.ActorNumber - 1].TryGetComponent<LapManager>(out var lapManager))
             {
-                lapManager.IsGoal
+                Observable.EveryUpdate().Subscribe(_ => Debug.Log(lapManager._isGoal.Value)).AddTo(this);
+
+                lapManager._isGoal
                     .Where(isGoal => isGoal)
                     .Subscribe(_ =>
                     {
+                        Debug.Log("ŒÄ‚Ño‚·");
                         GameManager.Instance.SetMinute(Minutes.Value);
                         GameManager.Instance.SetSecond(Seconds.Value);
                     })
