@@ -14,7 +14,13 @@ public class RankingManager : MonoBehaviour
     List<int> _order = new List<int>();
     int a = 1;
     StringBuilder _rankingText = new StringBuilder();
-    private void Start()
+    private async void Start()
+    {
+        await EnsureLoggin(); //ログイン状態を確認。ログイン出来ていなかったらログインする
+        GetRanking();
+    }
+
+    private void GetRanking()
     {
         PlayFabClientAPI.GetLeaderboard(new GetLeaderboardRequest
         {
@@ -41,6 +47,21 @@ public class RankingManager : MonoBehaviour
         {
             Debug.Log("エラーでた");
         });
+    }
+
+    private async UniTask EnsureLoggin()
+    {
+        if (PlayFabClientAPI.IsClientLoggedIn()) return; //既にログイン済みならreturn
+        var request = new PlayFab.ClientModels.LoginWithCustomIDRequest
+        {
+            CustomId = SystemInfo.deviceUniqueIdentifier,
+            CreateAccount = true,
+        };
+        var tcs = new UniTaskCompletionSource<bool>();
+        PlayFabClientAPI.LoginWithCustomID(request,
+            result => tcs.TrySetResult(true),
+            error => Debug.Log("ログイン失敗"));
+        await tcs.Task;
     }
     private string ConvertSecondsToTime(int seconds)
     {

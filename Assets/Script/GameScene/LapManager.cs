@@ -25,10 +25,10 @@ public class LapManager : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!_view.IsMine) return;
-        var trigger = other.GetComponent<TriggerID>();
-        Triggers.Add(trigger.ID);
-        // Debug.Log($"^^{trigger.name}‚ð’Ê‰ß");
-
+        if (other.TryGetComponent<TriggerID>(out var triggerID))
+        {
+            Triggers.Add(triggerID.ID);
+        }
     }
     public void LapComplate()
     {

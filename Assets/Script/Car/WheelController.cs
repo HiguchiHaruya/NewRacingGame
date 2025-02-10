@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Photon.Pun;
 
-public class WheelController : Vehicle, ICar
+public class WheelController : Vehicle, ICar, IShooter
 {
     [SerializeField]
     private float _turnSpeed = 65f;
@@ -14,13 +14,20 @@ public class WheelController : Vehicle, ICar
     private float _tiltSpeed = 5f;
     [SerializeField]
     private WheelCollider _frontRight, _frontLeft, _rearRight, _rearLeft;
-    [SerializeField] CarSound _sound;
+    [SerializeField]
+    CarSound _sound;
     [SerializeField]
     private Transform _cameraPosition;
+    [SerializeField]
+    private Transform _firePoint;
+    [SerializeField]
+    private Transform _projectilePrefab;
+
     private Rigidbody _rb;
     private Transform _carbody;
     private float _forwardInput;
     private float _sideInput;
+    private float _fireInput;
     private InputReader _inputReader;
     private PhotonView _photonView;
     private float _soundPitch = 1;
@@ -60,6 +67,10 @@ public class WheelController : Vehicle, ICar
         {
             _sideInput = -1 * context.ReadValue<float>();
         }).AddTo(this);
+
+        _inputReader.OnOtherAsObservable
+            .Subscribe(_ => Shoot())
+            .AddTo(this);
     }
     private void OnDestroy()
     {
@@ -143,5 +154,12 @@ public class WheelController : Vehicle, ICar
     public override void Acceleration(Rigidbody rb)
     {
         base.Acceleration(rb);
+    }
+
+    public void Shoot()
+    {
+        if (!_photonView.IsMine) return;
+        var projectile = PhotonNetwork.Instantiate(_projectilePrefab.name, _firePoint.position, _firePoint.rotation);
+       projectile.GetComponent<StraightProjectile>().SetUp(_firePoint.forward, _firePoint.transform.position);
     }
 }
