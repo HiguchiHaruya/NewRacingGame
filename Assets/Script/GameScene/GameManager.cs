@@ -32,11 +32,11 @@ public class GameManager : PunSingleton<GameManager>
     private async void GameEndAsync()
     {
         await SetGoalFlag();
-        PhotonNetwork.Destroy(_player);
         int goalPlayers = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Goal") && (bool)p.CustomProperties["Goal"]);
         if (goalPlayers >= PhotonNetwork.PlayerList.Length)
         {
             await ResultTimeToPlayFabAsync();
+         //   PhotonNetwork.Destroy(_player);
             photonView.RPC("TransitResultScene", RpcTarget.All);
         }
     }
@@ -86,7 +86,7 @@ public class GameManager : PunSingleton<GameManager>
             result =>
             {
                 tcs.TrySetResult(true);
-                Debug.Log("タイム送信完了");
+                Debug.Log($"{totalSeconds} タイム送信完了");
             },
             error =>
             {
@@ -122,6 +122,8 @@ public class GameManager : PunSingleton<GameManager>
     [PunRPC]
     private void TransitResultScene()
     {
+        if (!PhotonNetwork.IsMasterClient) return;
+        Debug.Log("遷移！");
         PhotonNetwork.LoadLevel("ResultScene");
     }
 }

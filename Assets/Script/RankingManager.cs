@@ -1,69 +1,51 @@
-using System.Collections;
+using Cysharp.Threading.Tasks;
+using PlayFab.ClientModels;
+using PlayFab.SharedModels;
+using PlayFab;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using System.IO; //ファイル操作の為に必要
-using Newtonsoft.Json; //jsonを使う為に必要
+using System.Text;
 
-public class RankingManager : Singleton<RankingManager>
+public class RankingManager : MonoBehaviour
 {
-    [SerializeField]
-    private bool _clearRankingData = false;
-    [System.Serializable] 
-    public class PlayerScore
-    {
-        public string playerName;
-        public float score;
-    }
-    private List<PlayerScore> rankingList = new List<PlayerScore>();
-    public List<PlayerScore> RankingList => rankingList;
-    private string filePath; //保存先
+    [SerializeField] TMP_Text _text;
+    SortedDictionary<int, string> _rankingData = new SortedDictionary<int, string>();
+    List<int> _order = new List<int>();
+    int a = 1;
+    StringBuilder _rankingText = new StringBuilder();
     private void Start()
     {
-        filePath = Path.Combine(Application.persistentDataPath, "ranking.json"); //jsonの保存先ファイルパスをしていする
-        if (_clearRankingData) ClearRankingData();
-        LoadRanking(); //起動時に保存されているrankingをロード
-    }
-    public void AddScore(string playerName, float score)
-    {
-        PlayerScore newScore = new PlayerScore { playerName = playerName, score = score };
-        rankingList.Add(newScore); //追加してく
-        rankingList.Sort((a, b) => a.score.CompareTo(b.score)); //昇順ソート
-        if (rankingList.Count > 3)
+        PlayFabClientAPI.GetLeaderboard(new GetLeaderboardRequest
         {
-            rankingList.RemoveAt(3);
-        }
-        SaveRanking();
+            StatisticName = "RaceTime",
+            MaxResultsCount = 5,
+            StartPosition = 0,
+        },
+        result =>
+        {
+            foreach (var item in result.Leaderboard)
+            {
+                _rankingData.Add(item.StatValue, item.DisplayName);
+                _order.Add(item.Position + 1);
+                Debug.Log($"{item.Position + 1}位 {item.DisplayName}  {item.StatValue}");
+            }
+            foreach (var item in _rankingData)
+            {
+                _rankingText.AppendLine($"{a}位 {item.Value} {ConvertSecondsToTime(item.Key)} ");
+                a++;
+            }
+            _text.text = _rankingText.ToString();
+        },
+        error =>
+        {
+            Debug.Log("エラーでた");
+        });
     }
-    /// <summary>ランキングデータ消去メソッド</summary>
-    private void ClearRankingData()
+    private string ConvertSecondsToTime(int seconds)
     {
-       // Debug.Log("ランキングデータ消去!!!!!");
-        rankingList.Clear();
-        List<PlayerScore> empty = new List<PlayerScore>();
-        string json = JsonConvert.SerializeObject(empty, Formatting.Indented); //Formatting.Indented → jsonファイルに改行とか入れて読みやすくしてくれる
-        File.WriteAllText(filePath, json);
-        SaveRanking();
-    }
-    ///<summary> ランキングデータセーブ</summary>
-    public void SaveRanking()
-    {
-        string jsonData = JsonConvert.SerializeObject(rankingList, Formatting.Indented); //リストをjson形式に変換する
-        File.WriteAllText(filePath, jsonData); //ファイルにjsonデータを書き込む
-      //  Debug.Log("rankingが保存されました！");
-    }
-    /// <summary> ランキングデータ読み込む</summary>
-    public void LoadRanking()
-    {
-        if (!File.Exists(filePath)) return; //ファイルが存在しない場合はreturn
-        string jsonData = File.ReadAllText(filePath); //読み込む
-        rankingList = JsonConvert.DeserializeObject<List<PlayerScore>>(jsonData); //Jsonデータをリストに変換してrankingListに入れる
-       // Debug.Log("rankingがロードされました！");
-    }
-    /// <summary>ランキングデータを渡す</summary>
-    /// <param name="rank"></param>
-    /// <returns>ランキングデータ</returns>
-    public PlayerScore GetRankingData(int rank)
-    {
-        return rankingList[rank];
+        int m = seconds / 60;
+        int s = seconds % 60;
+        return $"{m:D2} : {s:D2}";
     }
 }

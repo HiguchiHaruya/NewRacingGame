@@ -6556,9 +6556,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8c4dc94e8de1e24f880488ca7ea7956, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _players:
-  - {fileID: 6856966066459350893, guid: cd96b2b346cf35a4abd17859329dff59, type: 3}
-  - {fileID: 6856966066459350893, guid: c9b53af298d7b354189eea9749128353, type: 3}
+  names:
+  - Car(Clone)
+  - Car2(Clone)
 --- !u!4 &50276440
 Transform:
   m_ObjectHideFlags: 0
