@@ -6,45 +6,41 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System;
 using Photon.Pun;
+using Cysharp.Threading.Tasks;
 
 public class Vehicle : MonoBehaviourPunCallbacks, ICar
 {
     [SerializeField]
     private float _maxTorque; //Max速度
-    public float angle; //横移動角度
-    public float brake; //ブレーキ力
+    public float _angle; //横移動角度
+    [SerializeField]
+    private float _brake; //ブレーキ力
+    [SerializeField]
+    private float _speedDebuff = 50;
     private float _torque = 0; //現在の速度
     float steer = 0;
     protected WheelCollider frontRight, frontLeft, rearRight, rearLeft; //タイヤ達
                                                                         // private CarState _currentState;
     public float Torque => _torque;
     public static Vehicle Instance;
-    private void Awake()
+    public virtual async void SpeedBuff()
     {
-        //if (Instance == null)
-        //{
-        //    Instance = this;
-        //}
-        //else if (Instance != null)
-        //{
-        //    Destroy(this);
-        //}
+        frontRight.brakeTorque = _speedDebuff;
+        frontLeft.brakeTorque = _speedDebuff;
+        rearLeft.brakeTorque = _speedDebuff;
+        rearRight.brakeTorque = _speedDebuff;
+        await UniTask.Delay(1000);
+        frontRight.brakeTorque = 0;
+        frontLeft.brakeTorque = 0;
+        rearLeft.brakeTorque = 0;
+        rearRight.brakeTorque = 0;
     }
-    private void Start()
+    public virtual async void SpeedDebuff()
     {
-        //  _currentState = CarState.Idle;
+        _torque = _maxTorque * 1.5f;
+        await UniTask.Delay(500);
+        _torque = _maxTorque;
     }
-    //private void Update()
-    //{
-    //    ChangeState();
-    //}
-
-    //private void ChangeState()
-    //{
-    //    if (frontLeft.motorTorque <= -2400) { _currentState = CarState.High; }
-    //    else if (frontLeft.motorTorque >= -2400 && frontLeft.motorTorque < 0) { _currentState = CarState.Low; }
-    //    else if (frontLeft.motorTorque >= 0) { _currentState = CarState.Idle; }
-    //}
     /// <summary>前移動メソッド</summary>
     public virtual void Precession(float input)
     {
@@ -94,12 +90,12 @@ public class Vehicle : MonoBehaviourPunCallbacks, ICar
     }
     public virtual void Breake()
     {
-      ////  var breakeInput = InputManager.Instance._inputActions.PlayerActionMap.Brake.ReadValue<float>();
-      //  float brakeforce = breakeInput > 0 ? brake : 0;
-      //  frontLeft.brakeTorque = brakeforce;
-      //  frontRight.brakeTorque = brakeforce;
-      //  rearLeft.brakeTorque = brakeforce;
-      //  rearRight.brakeTorque = brakeforce;
+        ////  var breakeInput = InputManager.Instance._inputActions.PlayerActionMap.Brake.ReadValue<float>();
+        //  float brakeforce = breakeInput > 0 ? brake : 0;
+        //  frontLeft.brakeTorque = brakeforce;
+        //  frontRight.brakeTorque = brakeforce;
+        //  rearLeft.brakeTorque = brakeforce;
+        //  rearRight.brakeTorque = brakeforce;
     }
     public virtual void Drift()
     {

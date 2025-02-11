@@ -3,8 +3,9 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Photon.Pun;
+using static UnityEngine.ParticleSystem;
 
-public class WheelController : Vehicle, ICar, IShooter
+public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
 {
     [SerializeField]
     private float _turnSpeed = 65f;
@@ -33,24 +34,30 @@ public class WheelController : Vehicle, ICar, IShooter
     private float _soundPitch = 1;
     private int _initial = 0;
     public float Speed { get; private set; }
-
+    private ParticleController _particle;
     private void Start()
     {
+        _particle = GetComponentInChildren<ParticleController>();
         _photonView = GetComponent<PhotonView>();
         if (!_photonView.IsMine)
         {
-            // GetComponent<PlayerInput>().enabled = false;
+            _particle.gameObject.SetActive(false);
             return;
         }
         _carbody = transform;
         _rb = GetComponent<Rigidbody>();
-        RegisterTire();
+        RegisterTire(); //タイヤを割り当てる
+        SubscribeInput(); //入力イベントに登録
+    }
 
+    private void SubscribeInput()
+    {
         _inputReader = GetComponent<InputReader>();
 
         _inputReader.OnMoveForwardAsObservable.Subscribe(context =>
         {
             _forwardInput = context.ReadValue<float>();
+
         }).AddTo(this);
 
         _inputReader.OnMoveBackAsObservable.Subscribe(context =>
@@ -72,6 +79,7 @@ public class WheelController : Vehicle, ICar, IShooter
             .Subscribe(_ => Shoot())
             .AddTo(this);
     }
+
     private void OnDestroy()
     {
         PhotonNetwork.Disconnect();
@@ -96,6 +104,14 @@ public class WheelController : Vehicle, ICar, IShooter
         Speed = _rb.velocity.magnitude;
 
         SetEngineSound();
+        if (_forwardInput == 1)
+        {
+            _particle.PlayParticle();
+        }
+        else
+        {
+            _particle.StopParticle();
+        }
     }
 
     private void SetEngineSound()
@@ -160,6 +176,26 @@ public class WheelController : Vehicle, ICar, IShooter
     {
         if (!_photonView.IsMine) return;
         var projectile = PhotonNetwork.Instantiate(_projectilePrefab.name, _firePoint.position, _firePoint.rotation);
-       projectile.GetComponent<StraightProjectile>().SetUp(_firePoint.forward, _firePoint.transform.position);
+        projectile.GetComponent<StraightProjectile>().SetUp(_firePoint.forward, _firePoint.transform.position, gameObject);
+    }
+    public override void SpeedBuff()
+    {
+        Debug.Log($"---{this.name} バフ呼ばれました");
+        _particle.PlayColorParticle();
+        base.SpeedBuff();
+    }
+    public override void SpeedDebuff()
+    {
+        Debug.Log($"---{this.name} デバフ呼ばれました");
+        base.SpeedDebuff();
+    }
+
+    public void ReceiveHit(GameObject attacker, ProjectileBase projectile)
+    {
+        SpeedDebuff(); //自分にスピードダウン
+        if (attacker.TryGetComponent<WheelController>(out var wc))
+        {
+            wc.SpeedBuff(); //当てた人にスピードアップ
+        }
     }
 }

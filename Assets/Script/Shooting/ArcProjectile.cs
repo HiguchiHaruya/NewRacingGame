@@ -12,7 +12,7 @@ public class ArcProjectile : ProjectileBase
     {
         _view = GetComponent<PhotonView>();
     }
-    public override  void SetUp(Vector3 dir, Vector3 firePoint)
+    public override  void SetUp(Vector3 dir, Vector3 firePoint, GameObject shooter)
     {
     }
 }

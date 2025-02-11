@@ -10,6 +10,7 @@ public abstract class ProjectileBase : MonoBehaviour
 {
     [SerializeField] protected float _speed = 50;
     [SerializeField] protected float _lifeTime = 5f;
+    protected GameObject _shooter;
     PhotonView _photonView;
     private async void Start()
     {
@@ -17,10 +18,12 @@ public abstract class ProjectileBase : MonoBehaviour
         await UniTask.Delay(4000);
         PhotonNetwork.Destroy(gameObject);
     }
-    protected virtual void OnCollisionEnter(Collision collision)
+
+    public virtual async void SetUp(Vector3 dir, Vector3 firePoint, GameObject shooter)
     {
-        if (!_photonView.IsMine) return;
-        PhotonNetwork.Destroy(gameObject);
+        await GetPhotonView();
+        _shooter = shooter;
+        _photonView.RPC("StraightShoot", RpcTarget.All, dir, firePoint);
     }
     private async UniTask GetPhotonView()
     {
@@ -36,10 +39,14 @@ public abstract class ProjectileBase : MonoBehaviour
         }
         await tcs.Task;
     }
-    public virtual async void SetUp(Vector3 dir, Vector3 firePoint)
+    protected virtual void OnCollisionEnter(Collision collision)
     {
-        await GetPhotonView();
-        _photonView.RPC("StraightShoot", RpcTarget.All, dir, firePoint);
+        if (!_photonView.IsMine) return;
+        if (collision.gameObject.TryGetComponent<IHitReceiver>(out var hit))
+        {
+            hit.ReceiveHit(_shooter, this);
+        }
+        PhotonNetwork.Destroy(gameObject);
     }
     [PunRPC]
     public void StraightShoot(Vector3 dir, Vector3 firePoint)
