@@ -16,14 +16,18 @@ public class Vehicle : MonoBehaviourPunCallbacks, ICar
     [SerializeField]
     private float _brake; //ブレーキ力
     [SerializeField]
-    private float _speedDebuff = 50;
+    private float _speedDebuff = 150;
     private float _torque = 0; //現在の速度
     float steer = 0;
     protected WheelCollider frontRight, frontLeft, rearRight, rearLeft; //タイヤ達
                                                                         // private CarState _currentState;
     public float Torque => _torque;
     public static Vehicle Instance;
-    public virtual async void SpeedBuff()
+    public virtual  void SpeedBuff()
+    {
+   
+    }
+    public virtual async void SpeedDebuff()
     {
         frontRight.brakeTorque = _speedDebuff;
         frontLeft.brakeTorque = _speedDebuff;
@@ -34,12 +38,6 @@ public class Vehicle : MonoBehaviourPunCallbacks, ICar
         frontLeft.brakeTorque = 0;
         rearLeft.brakeTorque = 0;
         rearRight.brakeTorque = 0;
-    }
-    public virtual async void SpeedDebuff()
-    {
-        _torque = _maxTorque * 1.5f;
-        await UniTask.Delay(500);
-        _torque = _maxTorque;
     }
     /// <summary>前移動メソッド</summary>
     public virtual void Precession(float input)

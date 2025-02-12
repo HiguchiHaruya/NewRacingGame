@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using TMPro;
 using Photon.Realtime;
+using PlayFab;
 public class PlayerNameText : MonoBehaviourPunCallbacks
 {
     [SerializeField] TMP_Text _nameText;
@@ -11,7 +12,13 @@ public class PlayerNameText : MonoBehaviourPunCallbacks
     {
         if (photonView.IsMine)
         {
-            _nameText.text = PhotonNetwork.NickName;
+            PlayFabClientAPI.GetAccountInfo(new PlayFab.ClientModels.GetAccountInfoRequest(),
+           result =>
+           {
+               _nameText.text = result.AccountInfo.TitleInfo.DisplayName;
+           },
+           error => Debug.Log(error.ErrorMessage));
+          //  _nameText.text = PhotonNetwork.NickName;
         }
     }
 }

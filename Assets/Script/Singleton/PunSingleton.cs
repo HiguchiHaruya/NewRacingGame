@@ -27,7 +27,6 @@ public class PunSingleton<T> : MonoBehaviourPunCallbacks where T : MonoBehaviour
         if (_instance == null)
         {
             _instance = this as T;
-            DontDestroyOnLoad(gameObject);
         }
         else if (_instance != this)
         {

@@ -19,7 +19,7 @@ public class GameFlowManager : MonoBehaviour
         }
         catch(Exception ex)
         {
-            Debug.LogError($"途中でエラーでた! {ex.Message}");
+            Debug.Log($"途中でエラーでた! {ex.Message}");
         }
     }
     private async UniTask PlayFabLogin() //PlayFabログイン

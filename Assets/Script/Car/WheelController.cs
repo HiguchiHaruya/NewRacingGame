@@ -23,6 +23,8 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
     private Transform _firePoint;
     [SerializeField]
     private Transform _projectilePrefab;
+    [SerializeField]
+    private float _forceAmount = 3000;
 
     private Rigidbody _rb;
     private Transform _carbody;
@@ -112,6 +114,10 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
         {
             _particle.StopParticle();
         }
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            AudioManager.instance.PlayLocal("スピードアップ", transform.position);
+        }
     }
 
     private void SetEngineSound()
@@ -182,6 +188,9 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
     {
         Debug.Log($"---{this.name} バフ呼ばれました");
         _particle.PlayColorParticle();
+        AudioManager.instance.PlayLocal("スピードアップ", transform.position);
+        _rb.AddForce(transform.forward * _forceAmount,ForceMode.Impulse);
+        this.GetComponent<CameraShaker>().CameraShake();
         base.SpeedBuff();
     }
     public override void SpeedDebuff()
