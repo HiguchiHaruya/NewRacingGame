@@ -13,20 +13,24 @@ using LitMotion;
 using TMPro;
 public class GameManager : PunSingleton<GameManager>
 {
-    [SerializeField] Transform[] _playerSpawnPoint;
+    [SerializeField, Header("プレイヤーの初期スポーン地点")] Transform[] _playerSpawnPoint;
+    [SerializeField, Header("NPC車の初期スポーン地点")] Transform[] _aiSpawnPoint;
+    [SerializeField, Header("NPC車の通過ポイント")] Transform[] _checkPoint;
     [SerializeField] Camera[] _playerCamera;
     [SerializeField] TMP_Text _countDownText;
     ReactiveProperty<bool> _isGameStart = new ReactiveProperty<bool>(false);
     public IReadOnlyReactiveProperty<bool> IsGameStart => _isGameStart;
-
+    private int _spawnAICount;
     int _minute;
     int _second;
-    List<string> names = new List<string>() { "Car", "Car2" };
+    List<string> _carNames = new List<string>() { "Car", "Car2" };
+    List<string> _aiNames = new List<string>() { "AICar1", "AICar2", "AICar3", "AICar4" };
     GameObject _player;
     int _initial = 0;
     private void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
+        _spawnAICount = _aiNames.Count - PhotonNetwork.PlayerList.Length;
         CountDown();
     }
     private void OnDestroy()
@@ -76,7 +80,7 @@ public class GameManager : PunSingleton<GameManager>
         if (PhotonNetwork.InRoom && _initial == 0)
         {
             _initial++;
-            _player = PhotonNetwork.Instantiate(names[PhotonNetwork.LocalPlayer.ActorNumber - 1], _playerSpawnPoint[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.position, Quaternion.Euler(0, 90, 0));
+            _player = PhotonNetwork.Instantiate(_carNames[PhotonNetwork.LocalPlayer.ActorNumber - 1], _playerSpawnPoint[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.position, Quaternion.Euler(0, 90, 0));
             var controller = _player.GetComponent<WheelController>();
             var virtualCamera = _player.GetComponentInChildren<CinemachineVirtualCamera>();
             _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.parent = _player.transform;
@@ -97,6 +101,15 @@ public class GameManager : PunSingleton<GameManager>
             {
                 _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].GetComponent<AudioListener>().enabled = false;
                 _player.GetComponent<AudioSource>().enabled = false;
+            }
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                for (int i = 0; i < _spawnAICount; i++)
+                {
+                    var ai = PhotonNetwork.Instantiate(_aiNames[i], _aiSpawnPoint[i].position, Quaternion.Euler(0, 90, 0));
+                    ai.GetComponent<AICarController>().SetWayPoint(_checkPoint);
+                }
             }
         }
     }

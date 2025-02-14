@@ -5,22 +5,26 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class AICarController : MonoBehaviour,IHitReceiver
+public class AICarController : MonoBehaviour, IHitReceiver
 {
     private NavMeshAgent _agent;
-    [SerializeField] private Transform[] wayPoints;
     [SerializeField] private GameObject _player;
     [SerializeField] private float _baseSpeed = 25;
-    private List<Transform> _wayPointList;
     private int _currentIndex = 0;
     private Rigidbody _rb;
-
+    List<Transform> _wayPoints = new List<Transform>();
     private void Start()
     {
         GameManager.Instance.IsGameStart.Where(g => g).Subscribe(_ => NavMeshSetUp()).AddTo(this);
         GameManager.Instance.IsGameStart.Where(g => g).Subscribe(_ => SetNextDestination()).AddTo(this);
     }
-
+    public void SetWayPoint(Transform[] points)
+    {
+        foreach (var point in points)
+        {
+            _wayPoints.Add(point);
+        }
+    }
     private void NavMeshSetUp()
     {
         _agent = GetComponent<NavMeshAgent>();
@@ -29,36 +33,29 @@ public class AICarController : MonoBehaviour,IHitReceiver
 
     private void FixedUpdate()
     {
+        if (!GameManager.Instance.IsGameStart.Value) return;
         // WayPoint‚É“ž’B‚µ‚½‚çŽŸ‚Ì–Ú“I’n‚Ö
         Circulate();
         Vector3 targetDir = (_agent.steeringTarget - transform.position).normalized;
         Quaternion targetRotation = Quaternion.LookRotation(targetDir);
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5);
-
-        float targetSpeed = _player.GetComponent<Rigidbody>().velocity.magnitude * 2;
-        _agent.speed = Mathf.Lerp(_baseSpeed, targetSpeed, Time.fixedDeltaTime * 2);
+        _agent.speed = _baseSpeed;
     }
     private void Circulate()
     {
-        //if (wayPoints.Length < 0) return;
-        //if (!_agent.pathPending && _agent.remainingDistance < 15f)
-        //{
-        //    _currentIndex = (_currentIndex + 1) % wayPoints.Length;
-        //    SetNextDestination();
-        //}
-        if (wayPoints.Length<= 0) return;
-        if (!_agent.pathPending && _agent.remainingDistance < 15f)
+        if (_wayPoints.Count <= 0) return;
+        if (!_agent.pathPending && _agent.remainingDistance < 30f)
         {
-            _currentIndex = (_currentIndex + 1) % wayPoints.Length;
+            _currentIndex = (_currentIndex + 1) % _wayPoints.Count;
             SetNextDestination();
         }
     }
 
     private void SetNextDestination()
     {
-        if (wayPoints.Length == 0) return;
+        if (_wayPoints.Count == 0) return;
         Vector3 randomOffset = new Vector3(Random.Range(-6f, 6f), 0, Random.Range(-6f, 6f));
-        Vector3 targetPosition = wayPoints[_currentIndex].position + randomOffset;
+        Vector3 targetPosition = _wayPoints[_currentIndex].position + randomOffset;
         _agent.SetDestination(targetPosition);
     }
     public async void SpeedDebuffAI()
@@ -70,7 +67,7 @@ public class AICarController : MonoBehaviour,IHitReceiver
     public void ReceiveHit(GameObject attacker, ProjectileBase projectile)
     {
         SpeedDebuffAI();
-       if(attacker.TryGetComponent<WheelController>(out var controler))
+        if (attacker.TryGetComponent<WheelController>(out var controler))
         {
             controler.SpeedBuff();
         }

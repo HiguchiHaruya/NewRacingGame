@@ -13,6 +13,7 @@ using PlayFab.ClientModels;
 
 public class LobbyManager : MonoBehaviourPunCallbacks
 {
+    [SerializeField] TMP_Text _ramdomFailText;
     [SerializeField] TMP_Text _statusText;
     [SerializeField] TMP_Text _readyText;
     [SerializeField] TMP_Text _TestText;
@@ -20,6 +21,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     [SerializeField] Button _readyButton;
     [SerializeField] InputField _roomNameInputField;
     [SerializeField] Button _submitButton;
+    [SerializeField] Button _randomButton;
     [SerializeField] GameObject _panel;
     private string _status;
     private UniTaskCompletionSource<bool> _joinRoomTask;
@@ -45,6 +47,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         _status = "サーバーに接続完了。ロビーに接続します";
         PhotonNetwork.AutomaticallySyncScene = true;
+
         _readyButton.interactable = false;
         _panel.SetActive(false);
         _readyText.text = "準備中";
@@ -55,6 +58,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         _status = "ロビーに接続完了。ルームに接続します";
         _panel.gameObject.SetActive(true);
+        _ramdomFailText.gameObject.SetActive(false);
+        _randomButton.onClick.AddListener(JoinRandomRoom);
         var name = await WaitInputField();
         PhotonNetwork.JoinOrCreateRoom(name, new RoomOptions { MaxPlayers = (byte)_maxPlayer, IsVisible = true }, TypedLobby.Default);
     }
@@ -65,6 +70,17 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         string result = await _inputTask.Task;
         _submitButton.onClick.RemoveAllListeners();
         return result;
+    }
+    private  void JoinRandomRoom()
+    {
+        PhotonNetwork.JoinRandomRoom();
+    }
+    public async override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        Debug.Log("ランダムな部屋が見つかりませんでした");
+        _ramdomFailText.gameObject.SetActive(true);
+        await UniTask.Delay(1000);
+        _ramdomFailText.gameObject.SetActive(false);
     }
     public async override void OnJoinedRoom()
     {
@@ -83,7 +99,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 
         //CheckAllReady();
     }
-    public override  void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
         if (!PhotonNetwork.IsMasterClient) return;
         if (changedProps.ContainsKey("IsReady") == true)
