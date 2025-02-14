@@ -20,7 +20,7 @@ public class PlayerNameInput : MonoBehaviour
     {
         await EnsureLoggin();
         string inputName = _nameInput.text.Trim();
-        if (!string.IsNullOrEmpty(inputName) && PlayFabClientAPI.IsClientLoggedIn())
+        if (!string.IsNullOrEmpty(inputName))
         {
             PhotonNetwork.NickName = inputName;
             var request = new UpdateUserTitleDisplayNameRequest

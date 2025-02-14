@@ -94,6 +94,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     }
     private async UniTask LoadNickNameFromPlayFab()
     {
+        if (!this.GetComponent<PhotonView>().IsMine) return;
         var tcs = new UniTaskCompletionSource<bool>();
         PlayFabClientAPI.GetAccountInfo(new PlayFab.ClientModels.GetAccountInfoRequest(),
             result =>

@@ -32,7 +32,7 @@ public class InputReader : MonoBehaviour, PlayerInputControls.IPlayerActionMapAc
         _view = GetComponent<PhotonView>();
         if (_view.IsMine)
         {
-            _controls = new PlayerInputControls();
+            _controls = InputManager.Instance._inputActions;
             _controls.PlayerActionMap.SetCallbacks(this);
             _controls.PlayerActionMap.Enable();
             Debug.Log("inputControlのセットアップが完了しました");

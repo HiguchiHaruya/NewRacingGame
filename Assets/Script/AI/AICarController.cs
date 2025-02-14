@@ -1,9 +1,11 @@
+using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using TMPro;
+using UniRx;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class AICarController : MonoBehaviour
+public class AICarController : MonoBehaviour,IHitReceiver
 {
     private NavMeshAgent _agent;
     [SerializeField] private Transform[] wayPoints;
@@ -15,10 +17,8 @@ public class AICarController : MonoBehaviour
 
     private void Start()
     {
-        //_wayPointManager = FindObjectOfType<WayPointManager>();
-        //_wayPointList = _wayPointManager.GetWayPoint();
-        NavMeshSetUp();
-        SetNextDestination();
+        GameManager.Instance.IsGameStart.Where(g => g).Subscribe(_ => NavMeshSetUp()).AddTo(this);
+        GameManager.Instance.IsGameStart.Where(g => g).Subscribe(_ => SetNextDestination()).AddTo(this);
     }
 
     private void NavMeshSetUp()
@@ -60,5 +60,19 @@ public class AICarController : MonoBehaviour
         Vector3 randomOffset = new Vector3(Random.Range(-6f, 6f), 0, Random.Range(-6f, 6f));
         Vector3 targetPosition = wayPoints[_currentIndex].position + randomOffset;
         _agent.SetDestination(targetPosition);
+    }
+    public async void SpeedDebuffAI()
+    {
+        _baseSpeed -= 10;
+        await UniTask.Delay(1000);
+        _baseSpeed += 10;
+    }
+    public void ReceiveHit(GameObject attacker, ProjectileBase projectile)
+    {
+        SpeedDebuffAI();
+       if(attacker.TryGetComponent<WheelController>(out var controler))
+        {
+            controler.SpeedBuff();
+        }
     }
 }

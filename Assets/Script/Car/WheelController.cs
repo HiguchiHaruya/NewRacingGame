@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Photon.Pun;
 using static UnityEngine.ParticleSystem;
+using System.Linq;
+using System.Collections.Generic;
 
 public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
 {
@@ -25,6 +27,7 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
     private Transform _projectilePrefab;
     [SerializeField]
     private float _forceAmount = 3000;
+    private List<Transform> _checkPointList = new List<Transform>();
 
     private Rigidbody _rb;
     private Transform _carbody;
@@ -48,8 +51,11 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
         }
         _carbody = transform;
         _rb = GetComponent<Rigidbody>();
+        GameManager.Instance.IsGameStart
+            .Where(g => g)
+            .Subscribe(_ => SubscribeInput())
+            .AddTo(this);
         RegisterTire(); //タイヤを割り当てる
-        SubscribeInput(); //入力イベントに登録
     }
 
     private void SubscribeInput()
@@ -79,6 +85,9 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
 
         _inputReader.OnOtherAsObservable
             .Subscribe(_ => Shoot())
+            .AddTo(this);
+        _inputReader.OnCameraSwitchAsObservable
+            .Subscribe(_ => TransitCheckPoint())
             .AddTo(this);
     }
 
@@ -119,6 +128,16 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
             AudioManager.instance.PlayLocal("スピードアップ", transform.position);
         }
     }
+    private void TransitCheckPoint()
+    {
+        var target = _checkPointList
+            .OrderBy(c => Vector3.SqrMagnitude(c.position - transform.position)) //二乗距離で計算
+            .First();
+        _rb.velocity = Vector3.zero;
+        _rb.angularVelocity = Vector3.zero;
+        transform.position = target.position;
+        transform.rotation = Quaternion.identity;
+    }
 
     private void SetEngineSound()
     {
@@ -134,6 +153,13 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
         else if (_forwardInput <= 0)
         {
             _sound._pitch = Mathf.Lerp(_sound._pitch, 0.5f, Time.deltaTime * 2);
+        }
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Respawn"))
+        {
+            _checkPointList.Add(other.gameObject.transform);
         }
     }
 
@@ -189,7 +215,7 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
         Debug.Log($"---{this.name} バフ呼ばれました");
         _particle.PlayColorParticle();
         AudioManager.instance.PlayLocal("スピードアップ", transform.position);
-        _rb.AddForce(transform.forward * _forceAmount,ForceMode.Impulse);
+        _rb.AddForce(transform.forward * _forceAmount, ForceMode.Impulse);
         this.GetComponent<CameraShaker>().CameraShake();
         base.SpeedBuff();
     }

@@ -8,10 +8,17 @@ using Cysharp.Threading.Tasks;
 using Photon.Realtime;
 using PlayFab.ClientModels;
 using PlayFab;
+using UnityEngine.UI;
+using LitMotion;
+using TMPro;
 public class GameManager : PunSingleton<GameManager>
 {
     [SerializeField] Transform[] _playerSpawnPoint;
     [SerializeField] Camera[] _playerCamera;
+    [SerializeField] TMP_Text _countDownText;
+    ReactiveProperty<bool> _isGameStart = new ReactiveProperty<bool>(false);
+    public IReadOnlyReactiveProperty<bool> IsGameStart => _isGameStart;
+
     int _minute;
     int _second;
     List<string> names = new List<string>() { "Car", "Car2" };
@@ -20,6 +27,7 @@ public class GameManager : PunSingleton<GameManager>
     private void Start()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
+        CountDown();
     }
     private void OnDestroy()
     {
@@ -29,6 +37,29 @@ public class GameManager : PunSingleton<GameManager>
     {
         GameSetUp();
     }
+    private async void CountDown()
+    {
+        await UniTask.Delay(1000);
+        TextAnimation("3");
+        await UniTask.Delay(1000);
+        TextAnimation("2");
+        await UniTask.Delay(1000);
+        TextAnimation("1");
+        await UniTask.Delay(1000);
+        TextAnimation("スタート!!!!");
+        _isGameStart.Value = true;
+        await UniTask.Delay(500);
+        _countDownText.gameObject.SetActive(false);
+    }
+    private void TextAnimation(string text)
+    {
+        LMotion.Create(0, text.Length, 0.5f)
+            .Bind(value =>
+            {
+                _countDownText.text = text.Substring(0, value);
+            })
+            .AddTo(this);
+    }
     private async void GameEndAsync()
     {
         await SetGoalFlag();
@@ -36,7 +67,7 @@ public class GameManager : PunSingleton<GameManager>
         if (goalPlayers >= PhotonNetwork.PlayerList.Length)
         {
             await ResultTimeToPlayFabAsync();
-         //   PhotonNetwork.Destroy(_player);
+            //   PhotonNetwork.Destroy(_player);
             photonView.RPC("TransitResultScene", RpcTarget.All);
         }
     }

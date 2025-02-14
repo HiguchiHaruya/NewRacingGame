@@ -25,7 +25,7 @@ public class LapManager : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!_view.IsMine) return;
-        if (other.TryGetComponent<TriggerID>(out var triggerID))
+        if (other.TryGetComponent<TriggerID>(out var triggerID) && !Triggers.Contains(triggerID.ID))
         {
             Triggers.Add(triggerID.ID);
         }
@@ -47,14 +47,5 @@ public class LapManager : MonoBehaviour
     {
         if (!_view.IsMine) return;
         Triggers.Clear();
-    }
-    private void FixedUpdate()
-    {
-        if (!_view.IsMine) return;
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            _currentLap.Value++;
-            Debug.Log(CurrentLap.Value);
-        }
     }
 }
