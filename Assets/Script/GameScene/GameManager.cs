@@ -1,14 +1,13 @@
 using Cinemachine;
 using Photon.Pun;
+using Photon.Realtime;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UniRx;
 using Cysharp.Threading.Tasks;
-using Photon.Realtime;
 using PlayFab.ClientModels;
 using PlayFab;
-using UnityEngine.UI;
 using LitMotion;
 using TMPro;
 using UnityEngine.Rendering.PostProcessing;
@@ -17,12 +16,13 @@ public class GameManager : PunSingleton<GameManager>
     [SerializeField, Header("プレイヤーの初期スポーン地点")] Transform[] _playerSpawnPoint;
     [SerializeField, Header("NPC車の初期スポーン地点")] Transform[] _aiSpawnPoint;
     [SerializeField, Header("NPC車の通過ポイント")] Transform[] _checkPoint;
+    [SerializeField, Header("観戦用カメラ")] CinemachineVirtualCamera[] _virtualCamera;
     [SerializeField] Camera[] _playerCamera;
     [SerializeField] TMP_Text _countDownText;
     [SerializeField] PostProcessVolume _postProcessVolume;
     ReactiveProperty<bool> _isGameStart = new ReactiveProperty<bool>(false);
-    public IReadOnlyReactiveProperty<bool> IsGameStart => _isGameStart;
     ReactiveProperty<bool> _isGameEnd = new ReactiveProperty<bool>(false);
+    public IReadOnlyReactiveProperty<bool> IsGameStart => _isGameStart;
     public IReadOnlyReactiveProperty<bool> IsGameEnd => _isGameEnd;
     private int _spawnAICount;
     int _minute;
@@ -31,8 +31,10 @@ public class GameManager : PunSingleton<GameManager>
     List<string> _aiNames = new List<string>() { "AICar1", "AICar2", "AICar3", "AICar4" };
     GameObject _player;
     int _initial = 0;
+    private bool _isAlone;
     private void Start()
     {
+        _isAlone = PhotonNetwork.PlayerList.Length < 2;
         PhotonNetwork.AutomaticallySyncScene = true;
         _spawnAICount = _aiNames.Count - PhotonNetwork.PlayerList.Length;
         CountDown();
@@ -70,6 +72,7 @@ public class GameManager : PunSingleton<GameManager>
     }
     private async void GameEndAsync()
     {
+        _player.GetComponent<CheckResult>().GetCamera(_playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1]);
         _isGameEnd.Value = true;
         _player.GetComponent<CheckResult>().ChangePostEffect(_postProcessVolume);
         await SetGoalFlag();
@@ -93,22 +96,41 @@ public class GameManager : PunSingleton<GameManager>
             _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.position = controller.GetCameraPosition().position;
             if (_player.GetComponent<PhotonView>().IsMine)
             {
+
                 _player
                              .GetComponent<LapManager>().IsGoal
                              .Where(g => g)
                              .Subscribe(_ => GameEndAsync())
                              .AddTo(this);
                 virtualCamera.Priority = 999;
-                _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].depth = 999;
+                _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].depth = 99;
                 _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].GetComponent<AudioListener>().enabled = true;
                 _player.GetComponent<AudioSource>().enabled = true;
+                _player.GetComponent<SpectatorCamera>().GetCamera(_virtualCamera);
+
+                //他のプレイヤーにカメラを装着
+                //PhotonView[] allview = FindObjectsOfType<PhotonView>();
+                //foreach (var view in allview)
+                //{
+                //    if (!view.IsMine)
+                //    {
+                //        var camera = _playerCamera[view.Owner.ActorNumber - 1];
+                //        var brain = camera.GetComponent<CinemachineBrain>();
+                //        var vcamera = view.GetComponentInChildren<CinemachineVirtualCamera>();
+                //        camera.gameObject.transform.parent = view.transform;
+                //        if (view.TryGetComponent<WheelController>(out var wl))
+                //        {
+                //            camera.transform.position = wl.GetCameraPosition().position;
+
+                //        }
+                //    }
+                //}
             }
             else
             {
                 _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].GetComponent<AudioListener>().enabled = false;
                 _player.GetComponent<AudioSource>().enabled = false;
             }
-
             if (PhotonNetwork.IsMasterClient)
             {
                 for (int i = 0; i < _spawnAICount; i++)

@@ -7,19 +7,27 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.UI;
+/// <summary>
+/// ゴール後のイベント
+/// </summary>
 public class CheckResult : MonoBehaviour
 {
+    [Header("UI関連")]
     [SerializeField] TMP_Text _text1;
     [SerializeField] TMP_Text _text2;
     [SerializeField] TMP_Text _highScoreText;
     [SerializeField] TMP_Text _scoreText;
     [SerializeField] GameObject _panel;
     [SerializeField] Button _spectatorButton;
+    Camera _camera;
     int _highScore;
     int _minute;
     int _second;
     bool _isAlone;
     string _errorMessage = "スコア記録されていません";
+    private PostProcessVolume _processVolume;
+    ReactiveProperty<bool> _spectatorMode = new ReactiveProperty<bool>(false);
+    public IReadOnlyReactiveProperty<bool> SpectatorMode => _spectatorMode;
     private async void Start()
     {
         _isAlone = PhotonNetwork.PlayerList.Length < 2;
@@ -43,25 +51,51 @@ public class CheckResult : MonoBehaviour
         }
         else
         {
-            _spectatorButton.onClick.AddListener(() => PhotonNetwork.Destroy(gameObject));
+            _spectatorButton.onClick.AddListener(() => DestroyCamera());
         }
         GameManager.Instance.TextAnimation("歴代最速記録", _text1);
         GameManager.Instance.TextAnimation("今回のタイム", _text2);
         GameManager.Instance.TextAnimation(ConvertSecondsToTime(_highScore).ToString(), _highScoreText);
     }
+    public void GetCamera(Camera camera)
+    {
+        _camera = camera;
+    }
+    private void DestroyCamera()
+    {
+        if (!_isAlone)
+        {
+            _spectatorMode.Value = true;
+            _panel.gameObject.SetActive(false);
+            BackPostEffect();
+        }
+    }
 
     public void ChangePostEffect(PostProcessVolume postProcessVolume)
     {
-        if (postProcessVolume.profile.TryGetSettings<DepthOfField>(out var data))
+        _processVolume = postProcessVolume;
+        if (_processVolume.profile.TryGetSettings<DepthOfField>(out var data))
         {
             data.focusDistance.value = 0.1f;
         }
-        if (postProcessVolume.profile.TryGetSettings<LensDistortion>(out var lens))
+        if (_processVolume.profile.TryGetSettings<LensDistortion>(out var lens))
         {
             lens.intensity.value = -100;
         }
     }
 
+    public void BackPostEffect()
+    {
+        if (_processVolume.profile.TryGetSettings<DepthOfField>(out var data))
+        {
+            data.focusDistance.value = 10f;
+        }
+        if (_processVolume.profile.TryGetSettings<LensDistortion>(out var lens))
+        {
+            lens.intensity.value = 10;
+        }
+
+    }
     public void SetSocre(int m, int s)
     {
         GameManager.Instance.TextAnimation($"{m:D2} : {s:D2}", _scoreText);
