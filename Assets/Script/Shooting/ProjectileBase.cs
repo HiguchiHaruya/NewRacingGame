@@ -12,12 +12,6 @@ public abstract class ProjectileBase : MonoBehaviour
     [SerializeField] protected float _lifeTime = 5f;
     protected GameObject _shooter;
     PhotonView _photonView;
-    private async void Start()
-    {
-        // await GetPhotonView();
-        await UniTask.Delay(4000);
-        PhotonNetwork.Destroy(gameObject);
-    }
 
     public virtual async void SetUp(Vector3 dir, Vector3 firePoint, GameObject shooter)
     {

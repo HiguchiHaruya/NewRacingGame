@@ -11,6 +11,7 @@ using PlayFab;
 using UnityEngine.UI;
 using LitMotion;
 using TMPro;
+using UnityEngine.Rendering.PostProcessing;
 public class GameManager : PunSingleton<GameManager>
 {
     [SerializeField, Header("プレイヤーの初期スポーン地点")] Transform[] _playerSpawnPoint;
@@ -18,8 +19,11 @@ public class GameManager : PunSingleton<GameManager>
     [SerializeField, Header("NPC車の通過ポイント")] Transform[] _checkPoint;
     [SerializeField] Camera[] _playerCamera;
     [SerializeField] TMP_Text _countDownText;
+    [SerializeField] PostProcessVolume _postProcessVolume;
     ReactiveProperty<bool> _isGameStart = new ReactiveProperty<bool>(false);
     public IReadOnlyReactiveProperty<bool> IsGameStart => _isGameStart;
+    ReactiveProperty<bool> _isGameEnd = new ReactiveProperty<bool>(false);
+    public IReadOnlyReactiveProperty<bool> IsGameEnd => _isGameEnd;
     private int _spawnAICount;
     int _minute;
     int _second;
@@ -44,34 +48,36 @@ public class GameManager : PunSingleton<GameManager>
     private async void CountDown()
     {
         await UniTask.Delay(1000);
-        TextAnimation("3");
+        TextAnimation("3", _countDownText);
         await UniTask.Delay(1000);
-        TextAnimation("2");
+        TextAnimation("2", _countDownText);
         await UniTask.Delay(1000);
-        TextAnimation("1");
+        TextAnimation("1", _countDownText);
         await UniTask.Delay(1000);
-        TextAnimation("スタート!!!!");
+        TextAnimation("スタート!!!!", _countDownText);
         _isGameStart.Value = true;
         await UniTask.Delay(500);
         _countDownText.gameObject.SetActive(false);
     }
-    private void TextAnimation(string text)
+    public void TextAnimation(string text, TMP_Text UIText)
     {
         LMotion.Create(0, text.Length, 0.5f)
             .Bind(value =>
             {
-                _countDownText.text = text.Substring(0, value);
+                UIText.text = text.Substring(0, value);
             })
             .AddTo(this);
     }
     private async void GameEndAsync()
     {
+        _isGameEnd.Value = true;
+        _player.GetComponent<CheckResult>().ChangePostEffect(_postProcessVolume);
         await SetGoalFlag();
         int goalPlayers = PhotonNetwork.PlayerList.Count(p => p.CustomProperties.ContainsKey("Goal") && (bool)p.CustomProperties["Goal"]);
         if (goalPlayers >= PhotonNetwork.PlayerList.Length)
         {
             await ResultTimeToPlayFabAsync();
-            //   PhotonNetwork.Destroy(_player);
+            await UniTask.Delay(5000);
             photonView.RPC("TransitResultScene", RpcTarget.All);
         }
     }

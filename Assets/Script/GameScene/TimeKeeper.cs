@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
-using Photon.Pun;
 using Photon.Realtime;
 
 public class TimeKeeper : Singleton<TimeKeeper>
@@ -39,6 +38,7 @@ public class TimeKeeper : Singleton<TimeKeeper>
                     Debug.Log("åƒÇ—èoÇ∑");
                     GameManager.Instance.SetMinute(Minutes.Value);
                     GameManager.Instance.SetSecond(Seconds.Value);
+                    lm.GetComponent<CheckResult>().SetSocre(Minutes.Value, Seconds.Value);
                 })
                 .AddTo(this);
         }
