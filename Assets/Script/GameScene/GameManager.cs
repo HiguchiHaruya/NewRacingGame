@@ -102,29 +102,27 @@ public class GameManager : PunSingleton<GameManager>
                              .Where(g => g)
                              .Subscribe(_ => GameEndAsync())
                              .AddTo(this);
-                virtualCamera.Priority = 999;
+                virtualCamera.Priority = 99;
                 _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].depth = 99;
                 _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].GetComponent<AudioListener>().enabled = true;
                 _player.GetComponent<AudioSource>().enabled = true;
                 _player.GetComponent<SpectatorCamera>().GetCamera(_virtualCamera);
 
-                //他のプレイヤーにカメラを装着
-                //PhotonView[] allview = FindObjectsOfType<PhotonView>();
-                //foreach (var view in allview)
-                //{
-                //    if (!view.IsMine)
-                //    {
-                //        var camera = _playerCamera[view.Owner.ActorNumber - 1];
-                //        var brain = camera.GetComponent<CinemachineBrain>();
-                //        var vcamera = view.GetComponentInChildren<CinemachineVirtualCamera>();
-                //        camera.gameObject.transform.parent = view.transform;
-                //        if (view.TryGetComponent<WheelController>(out var wl))
-                //        {
-                //            camera.transform.position = wl.GetCameraPosition().position;
-
-                //        }
-                //    }
-                //}
+                PhotonView[] allview = FindObjectsOfType<PhotonView>();
+                foreach (var view in allview)
+                {
+                    if (view.gameObject.CompareTag("Car") && view.TryGetComponent<WheelController>(out var c))
+                    {
+                        if (view.IsMine)
+                        {
+                            c.GetCanvas().gameObject.SetActive(true);
+                        }
+                        else if (!view.IsMine)
+                        {
+                            c.GetCanvas().gameObject.SetActive(false);
+                        }
+                    }
+                }
             }
             else
             {

@@ -52,17 +52,18 @@ public class SpectatorCamera : MonoBehaviour
     /// カメラの番号を指定してね.インデックスは0スタートで
     /// </summary>
     /// <param name="num"></param>
-    private void SwitchCamera(int num)
+    public void SwitchCamera(int num)
     {
+
         for (int i = 0; i < _spectatorCameras.Count; i++)
         {
             if (i == num)
             {
-                _spectatorCameras[num].Priority = 999;
+                _spectatorCameras[i].Priority = 200;
             }
             else
             {
-                _spectatorCameras[num].Priority = 0;
+                _spectatorCameras[i].Priority = 0;
             }
         }
 

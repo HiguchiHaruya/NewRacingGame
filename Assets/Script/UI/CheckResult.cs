@@ -65,6 +65,8 @@ public class CheckResult : MonoBehaviour
     {
         if (!_isAlone)
         {
+            var s = gameObject.GetComponent<SpectatorCamera>();
+            s.SwitchCamera(0);
             _spectatorMode.Value = true;
             _panel.gameObject.SetActive(false);
             BackPostEffect();

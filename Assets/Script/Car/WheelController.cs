@@ -6,8 +6,9 @@ using Photon.Pun;
 using static UnityEngine.ParticleSystem;
 using System.Linq;
 using System.Collections.Generic;
+using System;
 
-public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
+public class WheelController : Vehicle, ICar, IShooter, IHitReceiver, IDisposable
 {
     [SerializeField]
     private float _turnSpeed = 65f;
@@ -27,8 +28,10 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
     private Transform _projectilePrefab;
     [SerializeField]
     private float _forceAmount = 3000;
+    [SerializeField]
+    Canvas _uiCanvas;
     private List<Transform> _checkPointList = new List<Transform>();
-
+    private readonly IDisposable _disposable;
     private Rigidbody _rb;
     private Transform _carbody;
     private float _forwardInput;
@@ -55,6 +58,10 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
             .Where(g => g)
             .Subscribe(_ => SubscribeInput())
             .AddTo(this);
+        //GameManager.Instance.IsGameEnd //ゴールしたら入力等の購読を解除
+        //    .Where(g => g)
+        //    .Subscribe(_ => )
+        //    .AddTo(this);
         RegisterTire(); //タイヤを割り当てる
     }
 
@@ -232,5 +239,14 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
         {
             wc.SpeedBuff(); //当てた人にスピードアップ
         }
+    }
+    public Canvas GetCanvas()
+    {
+        return _uiCanvas;
+    }
+
+    public void Dispose()
+    {
+        _disposable.Dispose();
     }
 }

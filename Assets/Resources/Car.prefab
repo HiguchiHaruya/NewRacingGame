@@ -7485,7 +7485,7 @@ MonoBehaviour:
   - m_Script
   m_LockStageInInspector: 
   m_StreamingVersion: 20170927
-  m_Priority: 149
+  m_Priority: 0
   m_StandbyUpdate: 2
   m_LookAt: {fileID: 4301849270217873766}
   m_Follow: {fileID: 4301849270217873766}
@@ -8145,7 +8145,7 @@ GameObject:
   - component: {fileID: -8147572617929684701}
   - component: {fileID: 8457590856981600705}
   - component: {fileID: 1335591700205072122}
-  m_Layer: 0
+  m_Layer: 15
   m_Name: Car
   m_TagString: Car
   m_Icon: {fileID: 0}
@@ -8283,6 +8283,7 @@ MonoBehaviour:
   _projectilePrefab: {fileID: 1494670815641726120, guid: 28a91e834faee0c49a497ab10c667cbe,
     type: 3}
   _forceAmount: 3000
+  _uiCanvas: {fileID: 7593347454273404820}
 --- !u!114 &6173368506334079404
 MonoBehaviour:
   m_ObjectHideFlags: 0
