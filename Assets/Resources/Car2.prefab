@@ -8201,6 +8201,7 @@ MonoBehaviour:
     type: 3}
   _forceAmount: 3000
   _uiCanvas: {fileID: 8339528749327135747}
+  _nameText: {fileID: 2081304249691262654}
 --- !u!114 &6173368506334079404
 MonoBehaviour:
   m_ObjectHideFlags: 0

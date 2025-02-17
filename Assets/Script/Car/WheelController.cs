@@ -7,29 +7,21 @@ using static UnityEngine.ParticleSystem;
 using System.Linq;
 using System.Collections.Generic;
 using System;
+using TMPro;
 
 public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
 {
-    [SerializeField]
-    private float _turnSpeed = 65f;
-    [SerializeField]
-    private float _driftAngle = 10f;
-    [SerializeField]
-    private float _tiltSpeed = 5f;
-    [SerializeField]
-    private WheelCollider _frontRight, _frontLeft, _rearRight, _rearLeft;
-    [SerializeField]
-    CarSound _sound;
-    [SerializeField]
-    private Transform _cameraPosition;
-    [SerializeField]
-    private Transform _firePoint;
-    [SerializeField]
-    private Transform _projectilePrefab;
-    [SerializeField]
-    private float _forceAmount = 3000;
-    [SerializeField]
-    Canvas _uiCanvas;
+    [SerializeField] private float _turnSpeed = 65f;
+    [SerializeField] private float _driftAngle = 10f;
+    [SerializeField] private float _tiltSpeed = 5f;
+    [SerializeField] private WheelCollider _frontRight, _frontLeft, _rearRight, _rearLeft;
+    [SerializeField] CarSound _sound;
+    [SerializeField] private Transform _cameraPosition;
+    [SerializeField] private Transform _firePoint;
+    [SerializeField] private Transform _projectilePrefab;
+    [SerializeField] private float _forceAmount = 3000;
+    [SerializeField] Canvas _uiCanvas;
+    [SerializeField] TMP_Text _nameText;
     private List<Transform> _checkPointList = new List<Transform>();
     private CompositeDisposable _subscriptions = new CompositeDisposable();
     private Rigidbody _rb;
@@ -64,7 +56,7 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
             .AddTo(this);
         RegisterTire(); //タイヤを割り当てる
 
-       
+       // _nameText.text = photonView.Owner.NickName;
     }
 
     private void SubscribeInput()
@@ -79,31 +71,31 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
         }
         _inputReader = GetComponent<InputReader>();
 
-        _subscriptions.Add( _inputReader.OnMoveForwardAsObservable.Subscribe(context =>
+        _subscriptions.Add(_inputReader.OnMoveForwardAsObservable.Subscribe(context =>
            {
                _forwardInput = context.ReadValue<float>();
 
            }).AddTo(this));
 
-        _subscriptions.Add( _inputReader.OnMoveBackAsObservable.Subscribe(context =>
+        _subscriptions.Add(_inputReader.OnMoveBackAsObservable.Subscribe(context =>
         {
             _forwardInput = -1 * context.ReadValue<float>();
         }).AddTo(this));
 
-        _subscriptions.Add( _inputReader.OnMoveRightAsObservable.Subscribe(context =>
+        _subscriptions.Add(_inputReader.OnMoveRightAsObservable.Subscribe(context =>
         {
             _sideInput = context.ReadValue<float>();
         }).AddTo(this));
 
-        _subscriptions.Add( _inputReader.OnMoveLeftAsObservable.Subscribe(context =>
+        _subscriptions.Add(_inputReader.OnMoveLeftAsObservable.Subscribe(context =>
         {
             _sideInput = -1 * context.ReadValue<float>();
         }).AddTo(this));
 
-        _subscriptions.Add( _inputReader.OnOtherAsObservable
+        _subscriptions.Add(_inputReader.OnOtherAsObservable
             .Subscribe(_ => Shoot())
             .AddTo(this));
-        _subscriptions.Add( _inputReader.OnCameraSwitchAsObservable
+        _subscriptions.Add(_inputReader.OnCameraSwitchAsObservable
             .Subscribe(_ => TransitCheckPoint())
             .AddTo(this));
     }
@@ -225,6 +217,7 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
     public void Shoot()
     {
         if (!_photonView.IsMine) return;
+        GameManager.Instance.PlayAudio("銃声", transform.position);
         var projectile = PhotonNetwork.Instantiate(_projectilePrefab.name, _firePoint.position, _firePoint.rotation);
         projectile.GetComponent<StraightProjectile>().SetUp(_firePoint.forward, _firePoint.transform.position, gameObject);
     }
@@ -251,8 +244,8 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
             wc.SpeedBuff(); //当てた人にスピードアップ
         }
     }
-    public Canvas GetCanvas()
+    public TMP_Text GetText()
     {
-        return _uiCanvas;
+        return _nameText;
     }
 }

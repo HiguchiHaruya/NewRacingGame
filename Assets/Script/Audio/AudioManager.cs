@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.UI;
 
 public class AudioManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] AudioSource _sourcePrefab;
     [SerializeField] int _initialPoolCount = 5;
     private readonly Queue<AudioSource> _pool = new Queue<AudioSource>();
+    private List<AudioSource> _activePool = new List<AudioSource>();
     private void Awake()
     {
         if (instance == null)
@@ -24,19 +26,37 @@ public class AudioManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    public async void PlayLocal(string clipId, Vector3 pos, float volume = 1)
+    public void SetVolume(float volume)
+    {
+        _sourcePrefab.volume = volume;
+    }
+    public async void PlayLocal(string clipId, Vector3 pos)
     {
         var audioSource = GetAudioSourceFromPool();
         audioSource.gameObject.SetActive(true);
         audioSource.transform.position = pos;
         audioSource.clip = _catalog.GetClip(clipId);
-        audioSource.volume = volume;
+        //audioSource.volume = volume;
         audioSource.Play();
+        _activePool.Add(audioSource);
         await PlayFinish(audioSource);
     }
-    public void PlayGlobal(string id, Vector3 pos, float volume, PhotonView view)
+    public void PlayGlobal(string id, Vector3 pos, float volume)
     {
-        view.RPC(nameof(PlayGlobalRPC), RpcTarget.All, id, pos, volume);
+        //çƒê∂ópÇÃPhotonviewÇàÍéûìIÇ…çÏê¨ÇµÇƒàÍïbå„Ç…çÌèú
+        var rpcObj = new GameObject("PhotonAudio");
+        var rpcView = rpcObj.AddComponent<PhotonView>();
+        rpcView.ViewID = PhotonNetwork.AllocateViewID(PhotonNetwork.LocalPlayer.ActorNumber); 
+
+        rpcView.RPC(nameof(PlayGlobalRPC), RpcTarget.All, id, pos, volume);
+        Destroy(rpcObj, 1f);
+    }
+    public void StopAudio()
+    {
+        foreach(var p in _activePool)
+        {
+            p.Stop();
+        }
     }
     private AudioSource GetAudioSourceFromPool()
     {
@@ -66,8 +86,8 @@ public class AudioManager : MonoBehaviour
         return obj;
     }
     [PunRPC]
-    private void PlayGlobalRPC(string id, Vector3 pos, float volume)
+    private void PlayGlobalRPC(string id, Vector3 pos)
     {
-        PlayLocal(id, pos, volume);
+        
     }
 }

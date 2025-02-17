@@ -37,45 +37,21 @@ public class LobbyPlayerList : MonoBehaviourPunCallbacks
     }
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps) //プレイヤーのプロパティが変更されたときに呼ばれるコールバック関数
     {
-      //  PlayFabClientAPI.GetAccountInfo(new PlayFab.ClientModels.GetAccountInfoRequest(),
-      //async result =>
-      //{
-      //    await UniTask.Delay(1500);
-      //    _playerName = result.AccountInfo.TitleInfo.DisplayName;
-      //    if (!string.IsNullOrEmpty(_playerName))
-      //    {
-      //        targetPlayer.NickName = _playerName;
-      //    }
-      //    UpdatePlayerList();
-      //},
-      //error => Debug.Log(error.ErrorMessage));
+        UpdatePlayerList();
     }
-    //async void UpdateNickNameList()
-    //{
-    //    await UniTask.Delay(1500);
-    //    foreach (var player in PhotonNetwork.PlayerList)
-    //    {
-    //        if (string.IsNullOrEmpty(_playerName))
-    //        {
-    //            _playerListText.text += $"Player {player.ActorNumber} : 名無しさん\n";
-    //            return;
-    //        }
-    //        _playerListText.text += $"Player {player.ActorNumber} : {player.NickName}\n";
-    //    }
-    //}
 
     async void UpdatePlayerList()
     {
-        await UniTask.Delay(2000);
+        await UniTask.Delay(500);
         _playerListText.text = "プレイヤー一覧 : \n";
         foreach (var player in PhotonNetwork.PlayerList)
         {
+            _playerListText.text += $"Player {player.ActorNumber} : {player.NickName}\n";
             if (string.IsNullOrEmpty(_playerName))
             {
                 _playerListText.text += $"Player {player.ActorNumber} : 名無しさん\n";
                 return;
             }
-            _playerListText.text += $"Player {player.ActorNumber} : {player.NickName}\n";
         }
     }
 

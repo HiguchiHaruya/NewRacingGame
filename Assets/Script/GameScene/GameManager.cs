@@ -38,6 +38,8 @@ public class GameManager : PunSingleton<GameManager>
         PhotonNetwork.AutomaticallySyncScene = true;
         _spawnAICount = _aiNames.Count - PhotonNetwork.PlayerList.Length;
         CountDown();
+
+       
     }
     private void OnDestroy()
     {
@@ -50,26 +52,32 @@ public class GameManager : PunSingleton<GameManager>
     private async void CountDown()
     {
         await UniTask.Delay(1000);
-        TextAnimation("3", _countDownText);
+        TextAnimation.Instance.LTextAnimation("3", _countDownText);
         await UniTask.Delay(1000);
-        TextAnimation("2", _countDownText);
+        TextAnimation.Instance.LTextAnimation("2", _countDownText);
         await UniTask.Delay(1000);
-        TextAnimation("1", _countDownText);
+        TextAnimation.Instance.LTextAnimation("1", _countDownText);
         await UniTask.Delay(1000);
-        TextAnimation("スタート!!!!", _countDownText);
+        TextAnimation.Instance.LTextAnimation("スタート!!!", _countDownText);
         _isGameStart.Value = true;
+
         await UniTask.Delay(500);
+        PhotonView[] allview = FindObjectsOfType<PhotonView>();
+        SetOtherPlayerName(allview);
         _countDownText.gameObject.SetActive(false);
+        AudioManager.instance.PlayLocal("BGM", transform.position);
     }
-    public void TextAnimation(string text, TMP_Text UIText)
+
+    private static void SetOtherPlayerName(PhotonView[] allview)
     {
-        LMotion.Create(0, text.Length, 0.5f)
-            .Bind(value =>
-            {
-                UIText.text = text.Substring(0, value);
-            })
-            .AddTo(this);
+        foreach (PhotonView view in allview)
+        {
+            if (!view.gameObject.CompareTag("Car")) continue;
+            var contr = view.GetComponent<WheelController>();
+            contr.GetText().text = view.Owner.NickName;
+        }
     }
+
     private async void GameEndAsync()
     {
         _player.GetComponent<CheckResult>().GetCamera(_playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1]);
@@ -81,6 +89,7 @@ public class GameManager : PunSingleton<GameManager>
         {
             await ResultTimeToPlayFabAsync();
             await UniTask.Delay(5000);
+            photonView.RPC(nameof(StopGlobal), RpcTarget.All);
             photonView.RPC("TransitResultScene", RpcTarget.All);
         }
     }
@@ -107,22 +116,6 @@ public class GameManager : PunSingleton<GameManager>
                 _playerCamera[PhotonNetwork.LocalPlayer.ActorNumber - 1].GetComponent<AudioListener>().enabled = true;
                 _player.GetComponent<AudioSource>().enabled = true;
                 _player.GetComponent<SpectatorCamera>().GetCamera(_virtualCamera);
-
-                //PhotonView[] allview = FindObjectsOfType<PhotonView>();
-                //foreach (var view in allview)
-                //{
-                //    if (view.gameObject.CompareTag("Car") && view.TryGetComponent<WheelController>(out var c))
-                //    {
-                //        if (view.IsMine)
-                //        {
-                //            c.GetCanvas().gameObject.SetActive(true);
-                //        }
-                //        else if (!view.IsMine)
-                //        {
-                //            c.GetCanvas().gameObject.SetActive(false);
-                //        }
-                //    }
-                //}
             }
             else
             {
@@ -189,12 +182,26 @@ public class GameManager : PunSingleton<GameManager>
         await UniTask.WaitUntil(() => PhotonNetwork.LocalPlayer.CustomProperties.ContainsKey("Goal")  //引数がtrueになるまで待つ
         && (bool)PhotonNetwork.LocalPlayer.CustomProperties["Goal"]);
     }
+    public void PlayAudio(string id, Vector3 pos)
+    {
+        photonView.RPC(nameof(PlayGlobal), RpcTarget.All, id, pos);
+    }
     [PunRPC]
     private void TransitResultScene()
     {
         if (!PhotonNetwork.IsMasterClient) return;
         Debug.Log("遷移！");
         PhotonNetwork.LoadLevel("ResultScene");
+    }
+    [PunRPC]
+    private void PlayGlobal(string id, Vector3 pos)
+    {
+        AudioManager.instance.PlayLocal(id, pos);
+    }
+    [PunRPC]
+    private void StopGlobal()
+    {
+        AudioManager.instance.StopAudio();
     }
 }
 

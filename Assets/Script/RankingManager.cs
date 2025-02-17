@@ -41,7 +41,7 @@ public class RankingManager : MonoBehaviour
                 _rankingText.AppendLine($"{a}ˆÊ {item.Value} {ConvertSecondsToTime(item.Key)} ");
                 a++;
             }
-            _text.text = _rankingText.ToString();
+            TextAnimation.Instance.LTextAnimation(_rankingText.ToString(), _text);
         },
         error =>
         {

@@ -47,6 +47,9 @@ MonoBehaviour:
   - StraightShoot
   - OnCollisionEnter
   - PlayGlobalRPC
+  - PlayGlobal
+  - StopGlobal
+  - SetPlayerName
   DisableAutoOpenWizard: 1
   ShowSettings: 0
   DevRegionSetOnce: 1

@@ -2,6 +2,7 @@ using Cysharp.Threading.Tasks;
 using Photon.Pun;
 using PlayFab;
 using PlayFab.ClientModels;
+using System.Linq;
 using TMPro;
 using UniRx;
 using UnityEngine;
@@ -53,9 +54,9 @@ public class CheckResult : MonoBehaviour
         {
             _spectatorButton.onClick.AddListener(() => DestroyCamera());
         }
-        GameManager.Instance.TextAnimation("歴代最速記録", _text1);
-        GameManager.Instance.TextAnimation("今回のタイム", _text2);
-        GameManager.Instance.TextAnimation(ConvertSecondsToTime(_highScore).ToString(), _highScoreText);
+        TextAnimation.Instance.LTextAnimation("歴代最速記録", _text1);
+        TextAnimation.Instance.LTextAnimation("今回のタイム", _text2);
+        TextAnimation.Instance.LTextAnimation(ConvertSecondsToTime(_highScore).ToString(), _highScoreText);
     }
     public void GetCamera(Camera camera)
     {
@@ -100,20 +101,20 @@ public class CheckResult : MonoBehaviour
     }
     public void SetSocre(int m, int s)
     {
-        GameManager.Instance.TextAnimation($"{m:D2} : {s:D2}", _scoreText);
+        TextAnimation.Instance.LTextAnimation($"{m:D2} : {s:D2}", _scoreText);
     }
     private void GetHighScore()
     {
         var request = new GetLeaderboardRequest
         {
             StatisticName = "RaceTime",
-            MaxResultsCount = 1
         };
         PlayFabClientAPI.GetLeaderboard(request, result =>
         {
             if (result.Leaderboard.Count > 0)
             {
-                _highScore = result.Leaderboard[0].StatValue;
+                var h = result.Leaderboard.OrderBy(x => x.StatValue).ToList();
+                _highScore = h[0].StatValue;
             }
         },
         error =>
