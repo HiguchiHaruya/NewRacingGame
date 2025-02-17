@@ -8,7 +8,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System;
 
-public class WheelController : Vehicle, ICar, IShooter, IHitReceiver, IDisposable
+public class WheelController : Vehicle, ICar, IShooter, IHitReceiver
 {
     [SerializeField]
     private float _turnSpeed = 65f;
@@ -31,7 +31,7 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver, IDisposabl
     [SerializeField]
     Canvas _uiCanvas;
     private List<Transform> _checkPointList = new List<Transform>();
-    private readonly IDisposable _disposable;
+    private CompositeDisposable _subscriptions = new CompositeDisposable();
     private Rigidbody _rb;
     private Transform _carbody;
     private float _forwardInput;
@@ -58,44 +58,54 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver, IDisposabl
             .Where(g => g)
             .Subscribe(_ => SubscribeInput())
             .AddTo(this);
-        //GameManager.Instance.IsGameEnd //ƒS[ƒ‹‚µ‚½‚ç“ü—Í“™‚Ìw“Ç‚ð‰ðœ
-        //    .Where(g => g)
-        //    .Subscribe(_ => )
-        //    .AddTo(this);
+        GameManager.Instance.IsGameEnd //ƒS[ƒ‹‚µ‚½‚ç“ü—Í“™‚Ìw“Ç‚ð‰ðœ
+            .Where(g => g)
+            .Subscribe(_ => _subscriptions.Dispose())
+            .AddTo(this);
         RegisterTire(); //ƒ^ƒCƒ„‚ðŠ„‚è“–‚Ä‚é
+
+       
     }
 
     private void SubscribeInput()
     {
+        if (photonView.IsMine)
+        {
+            _uiCanvas.gameObject.SetActive(true);
+        }
+        else
+        {
+            _uiCanvas.gameObject.SetActive(false);
+        }
         _inputReader = GetComponent<InputReader>();
 
-        _inputReader.OnMoveForwardAsObservable.Subscribe(context =>
-        {
-            _forwardInput = context.ReadValue<float>();
+        _subscriptions.Add( _inputReader.OnMoveForwardAsObservable.Subscribe(context =>
+           {
+               _forwardInput = context.ReadValue<float>();
 
-        }).AddTo(this);
+           }).AddTo(this));
 
-        _inputReader.OnMoveBackAsObservable.Subscribe(context =>
+        _subscriptions.Add( _inputReader.OnMoveBackAsObservable.Subscribe(context =>
         {
             _forwardInput = -1 * context.ReadValue<float>();
-        }).AddTo(this);
+        }).AddTo(this));
 
-        _inputReader.OnMoveRightAsObservable.Subscribe(context =>
+        _subscriptions.Add( _inputReader.OnMoveRightAsObservable.Subscribe(context =>
         {
             _sideInput = context.ReadValue<float>();
-        }).AddTo(this);
+        }).AddTo(this));
 
-        _inputReader.OnMoveLeftAsObservable.Subscribe(context =>
+        _subscriptions.Add( _inputReader.OnMoveLeftAsObservable.Subscribe(context =>
         {
             _sideInput = -1 * context.ReadValue<float>();
-        }).AddTo(this);
+        }).AddTo(this));
 
-        _inputReader.OnOtherAsObservable
+        _subscriptions.Add( _inputReader.OnOtherAsObservable
             .Subscribe(_ => Shoot())
-            .AddTo(this);
-        _inputReader.OnCameraSwitchAsObservable
+            .AddTo(this));
+        _subscriptions.Add( _inputReader.OnCameraSwitchAsObservable
             .Subscribe(_ => TransitCheckPoint())
-            .AddTo(this);
+            .AddTo(this));
     }
 
     private void OnDestroy()
@@ -144,6 +154,7 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver, IDisposabl
         _rb.angularVelocity = Vector3.zero;
         transform.position = target.position;
         transform.rotation = Quaternion.identity;
+        transform.rotation = Quaternion.Euler(0f, target.GetComponent<TriggerID>().Euler, 0f);
     }
 
     private void SetEngineSound()
@@ -243,10 +254,5 @@ public class WheelController : Vehicle, ICar, IShooter, IHitReceiver, IDisposabl
     public Canvas GetCanvas()
     {
         return _uiCanvas;
-    }
-
-    public void Dispose()
-    {
-        _disposable.Dispose();
     }
 }

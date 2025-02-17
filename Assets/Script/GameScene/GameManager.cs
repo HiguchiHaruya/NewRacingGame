@@ -108,21 +108,21 @@ public class GameManager : PunSingleton<GameManager>
                 _player.GetComponent<AudioSource>().enabled = true;
                 _player.GetComponent<SpectatorCamera>().GetCamera(_virtualCamera);
 
-                PhotonView[] allview = FindObjectsOfType<PhotonView>();
-                foreach (var view in allview)
-                {
-                    if (view.gameObject.CompareTag("Car") && view.TryGetComponent<WheelController>(out var c))
-                    {
-                        if (view.IsMine)
-                        {
-                            c.GetCanvas().gameObject.SetActive(true);
-                        }
-                        else if (!view.IsMine)
-                        {
-                            c.GetCanvas().gameObject.SetActive(false);
-                        }
-                    }
-                }
+                //PhotonView[] allview = FindObjectsOfType<PhotonView>();
+                //foreach (var view in allview)
+                //{
+                //    if (view.gameObject.CompareTag("Car") && view.TryGetComponent<WheelController>(out var c))
+                //    {
+                //        if (view.IsMine)
+                //        {
+                //            c.GetCanvas().gameObject.SetActive(true);
+                //        }
+                //        else if (!view.IsMine)
+                //        {
+                //            c.GetCanvas().gameObject.SetActive(false);
+                //        }
+                //    }
+                //}
             }
             else
             {
