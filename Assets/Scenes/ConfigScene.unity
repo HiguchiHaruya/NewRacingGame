@@ -1192,8 +1192,8 @@ RectTransform:
   m_Children:
   - {fileID: 34015035}
   - {fileID: 1338971242}
-  - {fileID: 650987900}
   - {fileID: 112329844}
+  - {fileID: 650987900}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2521,7 +2521,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u672A\u5B9A"
+  m_text: "\u30C1\u30A7\u30C3\u30AF\u30DD\u30A4\u30F3\u30C8\u304B\u3089\u3084\u308A\u76F4\u3059"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6cfe0582a06386c4fbac73a113fe1dbd, type: 2}
   m_sharedMaterial: {fileID: 212344132623931396, guid: 6cfe0582a06386c4fbac73a113fe1dbd,
@@ -2549,8 +2549,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 55.44
-  m_fontSizeBase: 55.44
+  m_fontSize: 22.8
+  m_fontSizeBase: 22.8
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

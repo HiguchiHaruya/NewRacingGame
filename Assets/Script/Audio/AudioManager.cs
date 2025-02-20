@@ -13,6 +13,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] int _initialPoolCount = 5;
     private readonly Queue<AudioSource> _pool = new Queue<AudioSource>();
     private List<AudioSource> _activePool = new List<AudioSource>();
+    PhotonView _view;
     private void Awake()
     {
         if (instance == null)
@@ -30,30 +31,9 @@ public class AudioManager : MonoBehaviour
     {
         _sourcePrefab.volume = volume;
     }
-    public async void PlayLocal(string clipId, Vector3 pos)
-    {
-        var audioSource = GetAudioSourceFromPool();
-        audioSource.gameObject.SetActive(true);
-        audioSource.transform.position = pos;
-        audioSource.clip = _catalog.GetClip(clipId);
-        //audioSource.volume = volume;
-        audioSource.Play();
-        _activePool.Add(audioSource);
-        await PlayFinish(audioSource);
-    }
-    public void PlayGlobal(string id, Vector3 pos, float volume)
-    {
-        //çƒê∂ópÇÃPhotonviewÇàÍéûìIÇ…çÏê¨ÇµÇƒàÍïbå„Ç…çÌèú
-        var rpcObj = new GameObject("PhotonAudio");
-        var rpcView = rpcObj.AddComponent<PhotonView>();
-        rpcView.ViewID = PhotonNetwork.AllocateViewID(PhotonNetwork.LocalPlayer.ActorNumber); 
-
-        rpcView.RPC(nameof(PlayGlobalRPC), RpcTarget.All, id, pos, volume);
-        Destroy(rpcObj, 1f);
-    }
     public void StopAudio()
     {
-        foreach(var p in _activePool)
+        foreach (var p in _activePool)
         {
             p.Stop();
         }
@@ -85,9 +65,23 @@ public class AudioManager : MonoBehaviour
         obj.enabled = true;
         return obj;
     }
+    public async void PlayLocal(string clipId, Vector3 pos)
+    {
+        var audioSource = GetAudioSourceFromPool();
+        audioSource.gameObject.SetActive(true);
+        audioSource.transform.position = pos;
+        audioSource.clip = _catalog.GetClip(clipId);
+        audioSource.Play();
+        _activePool.Add(audioSource);
+        await PlayFinish(audioSource);
+    }
+    public void PlayGlobal(string id, Vector3 pos, float volume)
+    {
+        _view.RPC(nameof(PlayGlobalRPC), RpcTarget.All, id, pos);
+    }
     [PunRPC]
     private void PlayGlobalRPC(string id, Vector3 pos)
     {
-        
+        PlayLocal(id, pos);
     }
 }
