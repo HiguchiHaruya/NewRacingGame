@@ -71,7 +71,7 @@ public class LobbyManager : MonoBehaviourPunCallbacks
         _submitButton.onClick.RemoveAllListeners();
         return result;
     }
-    private  void JoinRandomRoom()
+    private void JoinRandomRoom()
     {
         PhotonNetwork.JoinRandomRoom();
     }
@@ -93,11 +93,8 @@ public class LobbyManager : MonoBehaviourPunCallbacks
     {
         _readyButton.interactable = false;
         _readyText.text = "èÄîıäÆóπ";
-        //photonView.RPC("CheckAllReady", RpcTarget.All);
         ExitGames.Client.Photon.Hashtable props = new ExitGames.Client.Photon.Hashtable { { "IsReady", true } };
         PhotonNetwork.LocalPlayer.SetCustomProperties(props);
-
-        //CheckAllReady();
     }
     public override void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
